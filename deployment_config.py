@@ -13,21 +13,35 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 
 # Azure Database Configuration
-AZURE_CONFIG = {
-    'server': os.getenv('DB_SERVER', 'ecs-sql-server-engagementmiser.database.windows.net'),
-    'database': os.getenv('DB_NAME', 'ecs_tweets_db'),
-    'username': os.getenv('DB_USERNAME', 'ecsadmin'),
-    'password': os.getenv('DB_PASSWORD', 'EngagementMiser!'),
+def get_azure_config():
+    """Get Azure configuration from Streamlit secrets or environment variables."""
+    try:
+        import streamlit as st
+        return {
+            'server': st.secrets.get('azure_db.server', 'ecs-sql-server-engagementmiser.database.windows.net'),
+            'database': st.secrets.get('azure_db.database', 'ecs_tweets_db'),
+            'username': st.secrets.get('azure_db.username', 'ecsadmin'),
+            'password': st.secrets.get('azure_db.password', 'EngagementMiser!'),
             'driver': 'ODBC+Driver+17+for+SQL+Server'
-}
+        }
+    except ImportError:
+        # Fallback for non-Streamlit environments
+        return {
+            'server': os.getenv('DB_SERVER', 'ecs-sql-server-engagementmiser.database.windows.net'),
+            'database': os.getenv('DB_NAME', 'ecs_tweets_db'),
+            'username': os.getenv('DB_USERNAME', 'ecsadmin'),
+            'password': os.getenv('DB_PASSWORD', 'EngagementMiser!'),
+            'driver': 'ODBC+Driver+17+for+SQL+Server'
+        }
 
 def get_azure_engine():
     """Get Azure SQL Database engine."""
     try:
+        config = get_azure_config()
         conn_str = (
-            f"mssql+pyodbc://{AZURE_CONFIG['username']}:{AZURE_CONFIG['password']}"
-            f"@{AZURE_CONFIG['server']}/{AZURE_CONFIG['database']}"
-            f"?driver={AZURE_CONFIG['driver']}"
+            f"mssql+pyodbc://{config['username']}:{config['password']}"
+            f"@{config['server']}/{config['database']}"
+            f"?driver={config['driver']}"
             "&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30"
         )
         engine = create_engine(conn_str, pool_pre_ping=True, pool_recycle=300)
