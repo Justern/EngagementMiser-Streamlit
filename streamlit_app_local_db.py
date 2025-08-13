@@ -94,7 +94,8 @@ def get_database_engine():
         
         # Test the connection
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1 as test")
+            from sqlalchemy import text
+            result = conn.execute(text("SELECT 1 as test"))
             st.success("✅ Connected to local MSSQL database through ngrok!")
         
         return engine
