@@ -119,6 +119,67 @@ def load_roberta_model():
         return None, None
 
 # Model-specific database adapters
+class LocalModelAdapter:
+    """Adapter class to make models work with LOCAL database through ngrok."""
+    
+    def __init__(self):
+        self.engine = None
+        try:
+            import streamlit as st
+            # Get local database connection from Streamlit secrets
+            server = st.secrets.get("local_db.server", "localhost")
+            database = st.secrets.get("local_db.database", "EngagementMiser")
+            username = st.secrets.get("local_db.username", "")
+            password = st.secrets.get("local_db.password", "")
+            
+            # Create connection string for local database
+            if username and password:
+                conn_str = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes"
+            else:
+                # Windows Authentication
+                conn_str = f"mssql+pyodbc://@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server&Trusted_Connection=yes&TrustServerCertificate=yes"
+            
+            from sqlalchemy import create_engine
+            self.engine = create_engine(conn_str, pool_pre_ping=True, pool_recycle=300)
+            print("✅ LocalModelAdapter initialized with local database connection")
+            
+        except Exception as e:
+            print(f"❌ Error initializing LocalModelAdapter: {e}")
+            self.engine = None
+    
+    def get_tweet_data(self, tweet_id):
+        """Get tweet data from LOCAL database."""
+        if not self.engine:
+            return None
+        
+        try:
+            query = f"""
+            SELECT 
+                tweet_id,
+                text as tweet_text,
+                author_id,
+                created_at,
+                retweet_count,
+                like_count,
+                followers_count,
+                total_engagements,
+                engagement_rate
+            FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
+            WHERE tweet_id = {tweet_id}
+            """
+            
+            with self.engine.connect() as conn:
+                result = conn.execute(text(query))
+                df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            
+            if not df.empty:
+                return df.iloc[0].to_dict()
+            return None
+            
+        except Exception as e:
+            print(f"Error fetching tweet data from local DB: {e}")
+            return None
+
 class AzureModelAdapter:
     """Adapter class to make models work with Azure database."""
     
@@ -221,8 +282,8 @@ class DeploymentModels:
     
     def __init__(self):
         print("🚀 Initializing DeploymentModels...")
-        self.adapter = AzureModelAdapter()
-        print("✅ AzureModelAdapter initialized")
+        self.adapter = LocalModelAdapter()
+        print("✅ LocalModelAdapter initialized")
         
         print("🔄 Loading RoBERTa model...")
         self.tokenizer, self.model = load_roberta_model()
