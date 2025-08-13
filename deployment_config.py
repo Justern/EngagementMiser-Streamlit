@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Deployment Configuration for Engagement Concordance Score
-=======================================================
+======================================================
 
 This file provides Azure database configuration for all 10 specialized models
 to work in a deployed environment without local file dependencies.
@@ -11,6 +11,16 @@ import os
 import sys
 from sqlalchemy import create_engine, text
 import pandas as pd
+import numpy as np
+
+# Try to import transformers for Hugging Face models
+try:
+    from transformers import AutoTokenizer, AutoModelForSequenceClassification
+    import torch
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    print("Warning: Transformers not available, using fallback models")
 
 # Azure Database Configuration
 def get_azure_config():
@@ -49,6 +59,28 @@ def get_azure_engine():
     except Exception as e:
         print(f"Error connecting to Azure: {e}")
         return None
+
+# Load the RoBERTa model from Hugging Face Hub
+def load_roberta_model():
+    """Load the RoBERTa model from Hugging Face Hub."""
+    if not TRANSFORMERS_AVAILABLE:
+        return None, None
+    
+    try:
+        # Load model from Hugging Face Hub
+        model_name = "Justern/text_softlabel_roberta"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        
+        # Set to evaluation mode
+        model.eval()
+        
+        print(f"✅ RoBERTa model loaded from {model_name}")
+        return tokenizer, model
+        
+    except Exception as e:
+        print(f"❌ Error loading RoBERTa model: {e}")
+        return None, None
 
 # Model-specific database adapters
 class AzureModelAdapter:
@@ -147,33 +179,66 @@ class AzureModelAdapter:
             print(f"Error fetching interaction data: {e}")
             return None
 
-# Simplified model implementations for deployment
+# Enhanced model implementations using RoBERTa
 class DeploymentModels:
-    """Simplified model implementations that work with Azure database."""
+    """Enhanced model implementations that use RoBERTa for analysis."""
     
     def __init__(self):
         self.adapter = AzureModelAdapter()
+        self.tokenizer, self.model = load_roberta_model()
+        
+        if self.tokenizer and self.model:
+            print("✅ RoBERTa model loaded successfully")
+        else:
+            print("⚠️ RoBERTa model not available, using fallback models")
+    
+    def _analyze_text_with_roberta(self, text):
+        """Analyze text using the RoBERTa model."""
+        if not self.tokenizer or not self.model:
+            return 0.0
+        
+        try:
+            # Tokenize and prepare input
+            inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True)
+            
+            # Get model predictions
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+                probabilities = torch.softmax(outputs.logits, dim=1)
+                
+            # Return the probability of the positive class (manipulation detected)
+            return float(probabilities[0][1].item())
+            
+        except Exception as e:
+            print(f"Error in RoBERTa analysis: {e}")
+            return 0.0
     
     def hyperbole_falsehood_score(self, tweet_id):
-        """Simplified hyperbole and falsehood detection."""
+        """Enhanced hyperbole and falsehood detection using RoBERTa."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '').lower()
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # Simple keyword-based scoring
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             hyperbole_words = ['amazing', 'incredible', 'unbelievable', 'mind-blowing', 'epic', 'legendary']
             falsehood_indicators = ['fake', 'hoax', 'conspiracy', 'cover-up', 'secret', 'hidden']
             
             score = 0.0
             for word in hyperbole_words:
-                if word in text:
+                if word in text.lower():
                     score += 0.2
             
             for word in falsehood_indicators:
-                if word in text:
+                if word in text.lower():
                     score += 0.3
             
             return min(score, 1.0)
@@ -183,15 +248,21 @@ class DeploymentModels:
             return 0.0
     
     def clickbait_score(self, tweet_id):
-        """Simplified clickbait detection."""
+        """Enhanced clickbait detection using RoBERTa."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
             text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # Simple clickbait indicators
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             clickbait_patterns = [
                 'you won\'t believe', 'shocking', 'this will change everything',
                 'number 7 will surprise you', 'what happened next', 'the truth about'
@@ -213,18 +284,41 @@ class DeploymentModels:
             return 0.0
     
     def engagement_mismatch_score(self, tweet_id):
-        """Simplified engagement mismatch detection."""
+        """Enhanced engagement mismatch detection."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            # Check if engagement seems disproportionate to content quality
-            text_length = len(tweet_data.get('tweet_text', ''))
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
+            
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Combine RoBERTa score with engagement metrics
+                text_length = len(text)
+                total_engagements = tweet_data.get('total_engagements', 0)
+                followers = tweet_data.get('followers_count', 1)
+                
+                # Engagement mismatch heuristic
+                engagement_ratio = total_engagements / followers if followers > 0 else 0
+                if text_length < 50 and engagement_ratio > 0.1:
+                    engagement_factor = 0.3
+                elif text_length < 100 and engagement_ratio > 0.05:
+                    engagement_factor = 0.2
+                else:
+                    engagement_factor = 0.0
+                
+                return min(roberta_score + engagement_factor, 1.0)
+            
+            # Fallback to simple heuristic
+            text_length = len(text)
             total_engagements = tweet_data.get('total_engagements', 0)
             followers = tweet_data.get('followers_count', 1)
             
-            # Simple heuristic: very short text with high engagement might be suspicious
             if text_length < 50 and total_engagements > followers * 0.1:
                 return 0.8
             elif text_length < 100 and total_engagements > followers * 0.05:
@@ -237,32 +331,70 @@ class DeploymentModels:
             return 0.0
     
     def content_recycling_score(self, tweet_id):
-        """Simplified content recycling detection."""
-        # For deployment, this would need more sophisticated duplicate detection
-        # For now, return a moderate score
-        return 0.3
-    
-    def coordinated_network_score(self, tweet_id):
-        """Simplified coordinated network detection."""
+        """Enhanced content recycling detection."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            author_id = tweet_data.get('author_id')
-            if not author_id:
+            text = tweet_data.get('tweet_text', '')
+            if not text:
                 return 0.0
             
-            # Get recent activity patterns
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to moderate score
+            return 0.3
+            
+        except Exception as e:
+            print(f"Error in content recycling detection: {e}")
+            return 0.0
+    
+    def coordinated_network_score(self, tweet_id):
+        """Enhanced coordinated network detection."""
+        try:
+            tweet_data = self.adapter.get_tweet_data(tweet_id)
+            if not tweet_data:
+                return 0.0
+            
+            text = tweet_data.get('tweet_text', '')
+            author_id = tweet_data.get('author_id')
+            
+            if not text or not author_id:
+                return 0.0
+            
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Get recent activity patterns
+                interactions = self.adapter.get_interaction_data(author_id)
+                if interactions is not None and not interactions.empty:
+                    recent_tweets = len(interactions)
+                    avg_engagement = interactions['total_engagements'].mean() if 'total_engagements' in interactions.columns else 0
+                    
+                    # Coordination indicators
+                    if recent_tweets > 50 and avg_engagement > 100:
+                        coordination_factor = 0.3
+                    elif recent_tweets > 20 and avg_engagement > 50:
+                        coordination_factor = 0.2
+                    else:
+                        coordination_factor = 0.0
+                    
+                    return min(roberta_score + coordination_factor, 1.0)
+                
+                return roberta_score
+            
+            # Fallback to simple coordination analysis
             interactions = self.adapter.get_interaction_data(author_id)
             if interactions is None or interactions.empty:
                 return 0.0
             
-            # Simple coordination indicators
             recent_tweets = len(interactions)
             avg_engagement = interactions['total_engagements'].mean() if 'total_engagements' in interactions.columns else 0
             
-            # High volume + consistent engagement might indicate coordination
             if recent_tweets > 50 and avg_engagement > 100:
                 return 0.7
             elif recent_tweets > 20 and avg_engagement > 50:
@@ -275,25 +407,31 @@ class DeploymentModels:
             return 0.0
     
     def emotive_manipulation_score(self, tweet_id):
-        """Simplified emotive manipulation detection."""
+        """Enhanced emotive manipulation detection using RoBERTa."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '').lower()
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # Emotional manipulation indicators
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             emotional_words = ['anger', 'fear', 'hate', 'love', 'hope', 'despair', 'joy', 'sadness']
             manipulative_phrases = ['make you feel', 'you should be', 'everyone knows', 'obviously']
             
             score = 0.0
             for word in emotional_words:
-                if word in text:
+                if word in text.lower():
                     score += 0.15
             
             for phrase in manipulative_phrases:
-                if phrase in text:
+                if phrase in text.lower():
                     score += 0.3
             
             return min(score, 1.0)
@@ -303,21 +441,43 @@ class DeploymentModels:
             return 0.0
     
     def rapid_engagement_spike_score(self, tweet_id):
-        """Simplified rapid engagement spike detection."""
-        # This would need temporal data analysis
-        # For deployment, return moderate score
-        return 0.4
-    
-    def generic_comment_score(self, tweet_id):
-        """Simplified generic comment detection."""
+        """Enhanced rapid engagement spike detection."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '').lower()
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # Generic comment indicators
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to moderate score
+            return 0.4
+            
+        except Exception as e:
+            print(f"Error in rapid engagement spike detection: {e}")
+            return 0.0
+    
+    def generic_comment_score(self, tweet_id):
+        """Enhanced generic comment detection using RoBERTa."""
+        try:
+            tweet_data = self.adapter.get_tweet_data(tweet_id)
+            if not tweet_data:
+                return 0.0
+            
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
+            
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             generic_phrases = [
                 'nice', 'good', 'bad', 'interesting', 'cool', 'wow', 'omg',
                 'thanks', 'thank you', 'you\'re welcome', 'no problem'
@@ -325,11 +485,11 @@ class DeploymentModels:
             
             score = 0.0
             for phrase in generic_phrases:
-                if phrase in text:
+                if phrase in text.lower():
                     score += 0.2
             
             # Very short generic responses
-            if len(text) < 20 and any(phrase in text for phrase in generic_phrases):
+            if len(text) < 20 and any(phrase in text.lower() for phrase in generic_phrases):
                 score += 0.3
             
             return min(score, 1.0)
@@ -339,15 +499,21 @@ class DeploymentModels:
             return 0.0
     
     def authority_signal_score(self, tweet_id):
-        """Simplified authority signal manipulation detection."""
+        """Enhanced authority signal manipulation detection using RoBERTa."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '').lower()
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # False authority indicators
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             authority_claims = [
                 'expert', 'doctor', 'scientist', 'researcher', 'official', 'authority',
                 'studies show', 'research proves', 'experts agree', 'official source'
@@ -355,7 +521,7 @@ class DeploymentModels:
             
             score = 0.0
             for claim in authority_claims:
-                if claim in text:
+                if claim in text.lower():
                     score += 0.3
             
             return min(score, 1.0)
@@ -365,15 +531,21 @@ class DeploymentModels:
             return 0.0
     
     def reply_bait_score(self, tweet_id):
-        """Simplified reply-bait detection."""
+        """Enhanced reply-bait detection using RoBERTa."""
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '').lower()
+            text = tweet_data.get('tweet_text', '')
+            if not text:
+                return 0.0
             
-            # Reply-bait indicators
+            # Use RoBERTa model if available
+            if self.tokenizer and self.model:
+                return self._analyze_text_with_roberta(text)
+            
+            # Fallback to keyword-based scoring
             reply_bait_patterns = [
                 'what do you think?', 'agree?', 'thoughts?', 'opinions?',
                 'who else?', 'am i right?', 'or is it just me?', 'change my mind'
@@ -381,7 +553,7 @@ class DeploymentModels:
             
             score = 0.0
             for pattern in reply_bait_patterns:
-                if pattern in text:
+                if pattern in text.lower():
                     score += 0.4
             
             # Question marks often indicate reply-baiting

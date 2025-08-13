@@ -928,8 +928,6 @@ def main():
         show_system_overview()
     elif page == "🔍 Live Tweet Analysis":
         show_live_analysis()
-        st.write("---")
-        show_main_scoring()
     elif page == "📊 Model Performance":
         show_model_performance()
     elif page == "⚙️ Settings":
