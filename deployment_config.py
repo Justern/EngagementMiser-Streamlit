@@ -63,23 +63,47 @@ def get_azure_engine():
 # Load the RoBERTa model from Hugging Face Hub
 def load_roberta_model():
     """Load the RoBERTa model from Hugging Face Hub."""
+    print("🔄 Starting RoBERTa model loading...")
+    
     if not TRANSFORMERS_AVAILABLE:
+        print("❌ Transformers not available - cannot load RoBERTa model")
         return None, None
     
     try:
         # Load model from Hugging Face Hub
         model_name = "Justern/text_softlabel_roberta"
+        print(f"📥 Attempting to load model from: {model_name}")
+        
+        print("🔄 Loading tokenizer...")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
+        print("✅ Tokenizer loaded successfully")
+        
+        print("🔄 Loading model...")
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        print("✅ Model loaded successfully")
         
         # Set to evaluation mode
         model.eval()
+        print("✅ Model set to evaluation mode")
         
-        print(f"✅ RoBERTa model loaded from {model_name}")
+        # Test the model with a simple input
+        print("🧪 Testing model with sample input...")
+        test_input = "This is a test tweet for model verification."
+        inputs = tokenizer(test_input, return_tensors="pt", truncation=True, max_length=512, padding=True)
+        
+        with torch.no_grad():
+            outputs = model(**inputs)
+            probabilities = torch.softmax(outputs.logits, dim=1)
+            test_score = float(probabilities[0][1].item())
+        
+        print(f"✅ Model test successful! Sample score: {test_score:.3f}")
+        print(f"✅ RoBERTa model fully loaded and operational from {model_name}")
         return tokenizer, model
         
     except Exception as e:
         print(f"❌ Error loading RoBERTa model: {e}")
+        import traceback
+        print(f"Full error traceback: {traceback.format_exc()}")
         return None, None
 
 # Model-specific database adapters
@@ -184,51 +208,89 @@ class DeploymentModels:
     """Enhanced model implementations that use RoBERTa for analysis."""
     
     def __init__(self):
+        print("🚀 Initializing DeploymentModels...")
         self.adapter = AzureModelAdapter()
+        print("✅ AzureModelAdapter initialized")
+        
+        print("🔄 Loading RoBERTa model...")
         self.tokenizer, self.model = load_roberta_model()
         
         if self.tokenizer and self.model:
             print("✅ RoBERTa model loaded successfully")
+            print(f"📊 Model type: {type(self.model)}")
+            print(f"📊 Tokenizer type: {type(self.tokenizer)}")
+            
+            # Test model with a simple input
+            test_text = "This is a test for model verification."
+            test_score = self._analyze_text_with_roberta(test_text)
+            print(f"🧪 Model test score: {test_score:.3f}")
+            
         else:
             print("⚠️ RoBERTa model not available, using fallback models")
+            print("❌ This means models will use simplified keyword-based scoring")
+            print("❌ Scores will be less accurate and may appear similar")
     
     def _analyze_text_with_roberta(self, text):
         """Analyze text using the RoBERTa model."""
+        print(f"🔍 RoBERTa analysis called for text: '{text[:100]}...'")
+        
         if not self.tokenizer or not self.model:
+            print("❌ RoBERTa model not available - falling back to keyword scoring")
             return 0.0
         
         try:
+            print("🔄 Tokenizing input text...")
             # Tokenize and prepare input
             inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True)
+            print(f"✅ Tokenization complete. Input shape: {inputs['input_ids'].shape}")
             
+            print("🔄 Running model inference...")
             # Get model predictions
             with torch.no_grad():
                 outputs = self.model(**inputs)
-                probabilities = torch.softmax(outputs.logits, dim=1)
+                print(f"✅ Model inference complete. Output shape: {outputs.logits.shape}")
                 
-            # Return the probability of the positive class (manipulation detected)
-            return float(probabilities[0][1].item())
-            
+                probabilities = torch.softmax(outputs.logits, dim=1)
+                print(f"✅ Probabilities calculated. Shape: {probabilities.shape}")
+                print(f"📊 Raw probabilities: {probabilities[0].tolist()}")
+                
+                # Return the probability of the positive class (manipulation detected)
+                score = float(probabilities[0][1].item())
+                print(f"🎯 Final RoBERTa score: {score:.3f}")
+                return score
+                
         except Exception as e:
-            print(f"Error in RoBERTa analysis: {e}")
+            print(f"❌ Error in RoBERTa analysis: {e}")
+            import traceback
+            print(f"Full error traceback: {traceback.format_exc()}")
             return 0.0
     
     def hyperbole_falsehood_score(self, tweet_id):
         """Enhanced hyperbole and falsehood detection using RoBERTa."""
+        print(f"🔍 Hyperbole detection called for tweet ID: {tweet_id}")
+        
         try:
             tweet_data = self.adapter.get_tweet_data(tweet_id)
             if not tweet_data:
+                print("❌ No tweet data found")
                 return 0.0
             
             text = tweet_data.get('tweet_text', '')
             if not text:
+                print("❌ No tweet text found")
                 return 0.0
+            
+            print(f"📝 Analyzing text: '{text[:100]}...'")
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                print("✅ Using RoBERTa model for analysis")
+                roberta_score = self._analyze_text_with_roberta(text)
+                print(f"🎯 RoBERTa score: {roberta_score:.3f}")
+                return roberta_score
             
             # Fallback to keyword-based scoring
+            print("⚠️ Using fallback keyword-based scoring (RoBERTa not available)")
             hyperbole_words = ['amazing', 'incredible', 'unbelievable', 'mind-blowing', 'epic', 'legendary']
             falsehood_indicators = ['fake', 'hoax', 'conspiracy', 'cover-up', 'secret', 'hidden']
             
@@ -236,15 +298,21 @@ class DeploymentModels:
             for word in hyperbole_words:
                 if word in text.lower():
                     score += 0.2
+                    print(f"🔍 Found hyperbole word: {word}")
             
             for word in falsehood_indicators:
                 if word in text.lower():
                     score += 0.3
+                    print(f"🔍 Found falsehood indicator: {word}")
             
-            return min(score, 1.0)
+            final_score = min(score, 1.0)
+            print(f"🎯 Fallback keyword score: {final_score:.3f}")
+            return final_score
             
         except Exception as e:
-            print(f"Error in hyperbole detection: {e}")
+            print(f"❌ Error in hyperbole detection: {e}")
+            import traceback
+            print(f"Full error traceback: {traceback.format_exc()}")
             return 0.0
     
     def clickbait_score(self, tweet_id):
@@ -568,3 +636,31 @@ class DeploymentModels:
 
 # Export the deployment models
 deployment_models = DeploymentModels()
+
+# Test function to verify model functionality
+def test_roberta_model():
+    """Test function to verify RoBERTa model is working."""
+    print("🧪 Testing RoBERTa model functionality...")
+    
+    try:
+        # Test with different types of text
+        test_texts = [
+            "This is a normal, genuine tweet.",
+            "AMAZING! You won't BELIEVE what happened next!",
+            "Fake news conspiracy cover-up revealed!",
+            "Just sharing some thoughts on the weather today."
+        ]
+        
+        for i, text in enumerate(test_texts):
+            print(f"\n📝 Test {i+1}: '{text}'")
+            score = deployment_models._analyze_text_with_roberta(text)
+            print(f"🎯 Score: {score:.3f}")
+            
+    except Exception as e:
+        print(f"❌ Test failed: {e}")
+        import traceback
+        print(f"Full error: {traceback.format_exc()}")
+
+# Run test if this file is run directly
+if __name__ == "__main__":
+    test_roberta_model()
