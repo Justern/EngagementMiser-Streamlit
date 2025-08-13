@@ -327,10 +327,12 @@ class DeploymentModels:
                 raw_score = float(outputs.logits[0][0].item())
                 print(f"📊 Raw logit score: {raw_score:.3f}")
                 
-                # Normalize to 0-1 range (assuming higher values = higher risk)
-                score = max(0.0, min(1.0, (raw_score + 5) / 10))  # Rough normalization
-                print(f"🎯 Normalized RoBERTa score: {score:.3f}")
-                return score
+                # Better normalization to 0-1 range with more differentiation
+                # Assuming logits range from roughly -10 to +10
+                # Use sigmoid-like transformation for better spread
+                normalized_score = 1.0 / (1.0 + np.exp(-raw_score / 2.0))
+                print(f"🎯 Normalized RoBERTa score: {normalized_score:.3f}")
+                return normalized_score
                 
         except Exception as e:
             print(f"❌ Error in RoBERTa analysis: {e}")
@@ -401,7 +403,32 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Clickbait-specific enhancements
+                clickbait_patterns = [
+                    'you won\'t believe', 'shocking', 'this will change everything',
+                    'number 7 will surprise you', 'what happened next', 'the truth about',
+                    'breaking', 'exclusive', 'just in', 'update', 'developing'
+                ]
+                
+                pattern_score = 0.0
+                for pattern in clickbait_patterns:
+                    if pattern.lower() in text.lower():
+                        pattern_score += 0.3
+                
+                # Punctuation analysis
+                exclamation_count = text.count('!')
+                question_count = text.count('?')
+                if exclamation_count > 2:
+                    pattern_score += 0.2
+                if question_count > 2:
+                    pattern_score += 0.15
+                
+                # Combine RoBERTa with clickbait-specific features
+                final_score = min(roberta_score * 0.6 + pattern_score * 0.4, 1.0)
+                print(f"🎯 Clickbait: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to keyword-based scoring
             clickbait_patterns = [
@@ -560,7 +587,35 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Emotive manipulation-specific analysis
+                emotional_words = ['anger', 'fear', 'hate', 'love', 'hope', 'despair', 'joy', 'sadness', 
+                                 'terrified', 'ecstatic', 'devastated', 'thrilled', 'horrified', 'amazed']
+                manipulative_phrases = ['make you feel', 'you should be', 'everyone knows', 'obviously',
+                                      'clearly', 'without a doubt', 'it\'s obvious', 'anyone can see']
+                urgency_words = ['now', 'immediately', 'urgent', 'critical', 'emergency', 'last chance']
+                
+                emotional_score = 0.0
+                for word in emotional_words:
+                    if word in text.lower():
+                        emotional_score += 0.12
+                
+                manipulative_score = 0.0
+                for phrase in manipulative_phrases:
+                    if phrase in text.lower():
+                        manipulative_score += 0.25
+                
+                urgency_score = 0.0
+                for word in urgency_words:
+                    if word in text.lower():
+                        urgency_score += 0.15
+                
+                # Combine RoBERTa with emotive-specific features
+                pattern_score = min(emotional_score + manipulative_score + urgency_score, 0.8)
+                final_score = min(roberta_score * 0.5 + pattern_score * 0.5, 1.0)
+                print(f"🎯 Emotive: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to keyword-based scoring
             emotional_words = ['anger', 'fear', 'hate', 'love', 'hope', 'despair', 'joy', 'sadness']
@@ -594,7 +649,35 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Rapid engagement spike-specific analysis
+                urgency_words = ['now', 'immediately', 'urgent', 'breaking', 'live', 'developing',
+                               'just in', 'update', 'alert', 'warning', 'critical', 'emergency']
+                time_pressure = ['last chance', 'limited time', 'don\'t wait', 'act fast',
+                               'before it\'s too late', 'while supplies last']
+                viral_indicators = ['trending', 'viral', 'everyone is talking about', 'hot topic']
+                
+                urgency_score = 0.0
+                for word in urgency_words:
+                    if word in text.lower():
+                        urgency_score += 0.15
+                
+                pressure_score = 0.0
+                for phrase in time_pressure:
+                    if phrase in text.lower():
+                        pressure_score += 0.25
+                
+                viral_score = 0.0
+                for indicator in viral_indicators:
+                    if indicator in text.lower():
+                        viral_score += 0.3
+                
+                # Combine RoBERTa with urgency-specific features
+                pattern_score = min(urgency_score + pressure_score + viral_score, 0.8)
+                final_score = min(roberta_score * 0.3 + pattern_score * 0.7, 1.0)
+                print(f"🎯 Rapid Engagement: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to moderate score
             return 0.4
@@ -616,7 +699,44 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Generic comment-specific analysis
+                generic_phrases = [
+                    'nice', 'good', 'bad', 'interesting', 'cool', 'wow', 'omg',
+                    'thanks', 'thank you', 'you\'re welcome', 'no problem', 'okay', 'sure'
+                ]
+                
+                filler_words = ['um', 'uh', 'like', 'you know', 'basically', 'literally', 'actually']
+                repetitive_patterns = ['very very', 'really really', 'so so', 'too too']
+                
+                generic_score = 0.0
+                for phrase in generic_phrases:
+                    if phrase in text.lower():
+                        generic_score += 0.15
+                
+                filler_score = 0.0
+                for word in filler_words:
+                    if word in text.lower():
+                        filler_score += 0.2
+                
+                repetitive_score = 0.0
+                for pattern in repetitive_patterns:
+                    if pattern in text.lower():
+                        repetitive_score += 0.3
+                
+                # Length penalty for very short responses
+                length_penalty = 0.0
+                if len(text) < 20:
+                    length_penalty = 0.25
+                elif len(text) < 50:
+                    length_penalty = 0.15
+                
+                # Combine RoBERTa with generic-specific features
+                pattern_score = min(generic_score + filler_score + repetitive_score + length_penalty, 0.8)
+                final_score = min(roberta_score * 0.4 + pattern_score * 0.6, 1.0)
+                print(f"🎯 Generic Comment: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to keyword-based scoring
             generic_phrases = [
@@ -652,7 +772,38 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Authority signal-specific analysis
+                authority_claims = [
+                    'expert', 'doctor', 'scientist', 'researcher', 'official', 'authority',
+                    'studies show', 'research proves', 'experts agree', 'official source',
+                    'professor', 'phd', 'specialist', 'analyst', 'consultant', 'advisor'
+                ]
+                
+                credential_indicators = ['certified', 'licensed', 'accredited', 'verified', 'endorsed']
+                statistical_claims = ['statistics', 'data shows', 'numbers prove', 'evidence indicates']
+                
+                authority_score = 0.0
+                for claim in authority_claims:
+                    if claim in text.lower():
+                        authority_score += 0.2
+                
+                credential_score = 0.0
+                for indicator in credential_indicators:
+                    if indicator in text.lower():
+                        credential_score += 0.25
+                
+                statistical_score = 0.0
+                for claim in statistical_claims:
+                    if claim in text.lower():
+                        statistical_score += 0.3
+                
+                # Combine RoBERTa with authority-specific features
+                pattern_score = min(authority_score + credential_score + statistical_score, 0.8)
+                final_score = min(roberta_score * 0.4 + pattern_score * 0.6, 1.0)
+                print(f"🎯 Authority: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to keyword-based scoring
             authority_claims = [
@@ -684,7 +835,48 @@ class DeploymentModels:
             
             # Use RoBERTa model if available
             if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
+                roberta_score = self._analyze_text_with_roberta(text)
+                
+                # Reply-bait specific analysis
+                reply_bait_patterns = [
+                    'what do you think?', 'agree?', 'thoughts?', 'opinions?',
+                    'who else?', 'am i right?', 'or is it just me?', 'change my mind',
+                    'anyone else?', 'thoughts below', 'discuss', 'debate', 'fight me'
+                ]
+                
+                engagement_questions = ['can you relate?', 'does this happen to you?', 'am i alone?',
+                                      'who else feels this?', 'raise your hand if', 'tag someone who']
+                controversial_phrases = ['unpopular opinion', 'hot take', 'controversial', 'divisive']
+                
+                bait_score = 0.0
+                for pattern in reply_bait_patterns:
+                    if pattern in text.lower():
+                        bait_score += 0.25
+                
+                engagement_score = 0.0
+                for question in engagement_questions:
+                    if question in text.lower():
+                        engagement_score += 0.3
+                
+                controversy_score = 0.0
+                for phrase in controversial_phrases:
+                    if phrase in text.lower():
+                        controversy_score += 0.25
+                
+                # Question mark analysis
+                question_marks = text.count('?')
+                if question_marks > 3:
+                    question_score = 0.3
+                elif question_marks > 1:
+                    question_score = 0.2
+                else:
+                    question_score = 0.0
+                
+                # Combine RoBERTa with reply-bait specific features
+                pattern_score = min(bait_score + engagement_score + controversy_score + question_score, 0.8)
+                final_score = min(roberta_score * 0.3 + pattern_score * 0.7, 1.0)
+                print(f"🎯 Reply Bait: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
+                return final_score
             
             # Fallback to keyword-based scoring
             reply_bait_patterns = [
