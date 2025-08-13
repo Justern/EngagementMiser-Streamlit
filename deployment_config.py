@@ -60,26 +60,36 @@ def get_azure_engine():
         print(f"Error connecting to Azure: {e}")
         return None
 
-# Load the RoBERTa model from Hugging Face Hub
+# Load the RoBERTa model from local files
 def load_roberta_model():
-    """Load the RoBERTa model from Hugging Face Hub."""
-    print("🔄 Starting RoBERTa model loading...")
+    """Load the RoBERTa model from local files."""
+    print("🔄 Starting RoBERTa model loading from local files...")
     
     if not TRANSFORMERS_AVAILABLE:
         print("❌ Transformers not available - cannot load RoBERTa model")
         return None, None
     
     try:
-        # Load model from Hugging Face Hub
-        model_name = "Justern/text_softlabel_roberta"
-        print(f"📥 Attempting to load model from: {model_name}")
+        # Use local model files instead of Hugging Face Hub
+        model_path = "."  # Current directory where model files are located
+        print(f"📁 Loading model from local path: {os.path.abspath(model_path)}")
+        
+        # Check if model files exist
+        required_files = ['config.json', 'model.safetensors', 'tokenizer.json', 'vocab.json']
+        missing_files = [f for f in required_files if not os.path.exists(os.path.join(model_path, f))]
+        
+        if missing_files:
+            print(f"❌ Missing model files: {missing_files}")
+            return None, None
+        
+        print("✅ All required model files found")
         
         print("🔄 Loading tokenizer...")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
         print("✅ Tokenizer loaded successfully")
         
         print("🔄 Loading model...")
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(model_path)
         print("✅ Model loaded successfully")
         
         # Set to evaluation mode
@@ -93,11 +103,13 @@ def load_roberta_model():
         
         with torch.no_grad():
             outputs = model(**inputs)
-            probabilities = torch.softmax(outputs.logits, dim=1)
-            test_score = float(probabilities[0][1].item())
+            # For single-class model, just get the raw logit value
+            test_score = float(outputs.logits[0][0].item())
+            # Normalize to 0-1 range (assuming higher values = higher risk)
+            test_score = max(0.0, min(1.0, (test_score + 5) / 10))  # Rough normalization
         
         print(f"✅ Model test successful! Sample score: {test_score:.3f}")
-        print(f"✅ RoBERTa model fully loaded and operational from {model_name}")
+        print(f"✅ RoBERTa model fully loaded and operational from local files")
         return tokenizer, model
         
     except Exception as e:
@@ -250,13 +262,13 @@ class DeploymentModels:
                 outputs = self.model(**inputs)
                 print(f"✅ Model inference complete. Output shape: {outputs.logits.shape}")
                 
-                probabilities = torch.softmax(outputs.logits, dim=1)
-                print(f"✅ Probabilities calculated. Shape: {probabilities.shape}")
-                print(f"📊 Raw probabilities: {probabilities[0].tolist()}")
+                # For single-class model, get the raw logit value
+                raw_score = float(outputs.logits[0][0].item())
+                print(f"📊 Raw logit score: {raw_score:.3f}")
                 
-                # Return the probability of the positive class (manipulation detected)
-                score = float(probabilities[0][1].item())
-                print(f"🎯 Final RoBERTa score: {score:.3f}")
+                # Normalize to 0-1 range (assuming higher values = higher risk)
+                score = max(0.0, min(1.0, (raw_score + 5) / 10))  # Rough normalization
+                print(f"🎯 Normalized RoBERTa score: {score:.3f}")
                 return score
                 
         except Exception as e:
