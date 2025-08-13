@@ -294,7 +294,7 @@ def analyze_tweet_with_ecs(tweet_id):
                 
                 # Call the model method
                 method = getattr(ecs_system, model_method)
-                score = method(tweet_text)
+                score = method(tweet_id)
                 
                 model_scores[model_display_name] = score
                 
