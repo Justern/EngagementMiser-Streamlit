@@ -18,17 +18,16 @@ AZURE_CONFIG = {
     'database': os.getenv('DB_NAME', 'ecs_tweets_db'),
     'username': os.getenv('DB_USERNAME', 'ecsadmin'),
     'password': os.getenv('DB_PASSWORD', 'EngagementMiser!'),
-    'driver': 'ODBC+Driver+18+for+SQL+Server'
+            'driver': 'pymssql'
 }
 
 def get_azure_engine():
     """Get Azure SQL Database engine."""
     try:
         conn_str = (
-            f"mssql+pyodbc://{AZURE_CONFIG['username']}:{AZURE_CONFIG['password']}"
-            f"@{AZURE_CONFIG['server']}/{AZURE_CONFIG['database']}"
-            f"?driver={AZURE_CONFIG['driver']}"
-            "&Encrypt=yes&TrustServerCertificate=no&Connection+Timeout=30"
+            f"mssql+pymssql://{AZURE_CONFIG['username']}:{AZURE_CONFIG['password']}"
+            f"@{AZURE_CONFIG['server']}:1433/{AZURE_CONFIG['database']}"
+            "?charset=utf8"
         )
         engine = create_engine(conn_str, pool_pre_ping=True, pool_recycle=300)
         return engine
