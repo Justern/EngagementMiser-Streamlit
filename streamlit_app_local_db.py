@@ -211,7 +211,7 @@ def show_tweet_selection():
         # Get full tweet data
         selected_tweet = fetch_tweet_by_id(selected_tweet_id)
         
-        if selected_tweet is not None:
+        if selected_tweet is not None and not selected_tweet.empty:
             st.success(f"✅ Selected Tweet ID: {selected_tweet_id}")
             
             # Display tweet details
@@ -259,7 +259,7 @@ def analyze_tweet_with_ecs(tweet_id):
         
         # Get tweet text from database
         tweet_data = fetch_tweet_by_id(tweet_id)
-        if not tweet_data:
+        if tweet_data is None or tweet_data.empty:
             st.error("❌ Could not fetch tweet data")
             return None
         
@@ -275,14 +275,14 @@ def analyze_tweet_with_ecs(tweet_id):
         models_to_run = [
             ('hyperbole_falsehood_score', 'Hyperbole & Falsehood'),
             ('clickbait_score', 'Clickbait Detection'),
-            ('emotional_manipulation_score', 'Emotional Manipulation'),
-            ('authority_appeal_score', 'Authority Appeal'),
-            ('urgency_score', 'Urgency & Scarcity'),
-            ('social_proof_score', 'Social Proof'),
-            ('reciprocity_score', 'Reciprocity'),
-            ('commitment_score', 'Commitment & Consistency'),
-            ('liking_score', 'Liking & Similarity'),
-            ('scarcity_score', 'Scarcity & Loss Aversion')
+            ('emotive_manipulation_score', 'Emotional Manipulation'),
+            ('authority_signal_score', 'Authority Appeal'),
+            ('rapid_engagement_spike_score', 'Urgency & Scarcity'),
+            ('coordinated_network_score', 'Social Proof'),
+            ('engagement_mismatch_score', 'Reciprocity'),
+            ('content_recycling_score', 'Commitment & Consistency'),
+            ('generic_comment_score', 'Liking & Similarity'),
+            ('reply_bait_score', 'Scarcity & Loss Aversion')
         ]
         
         for i, (model_method, model_display_name) in enumerate(models_to_run):
