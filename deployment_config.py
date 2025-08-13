@@ -341,562 +341,285 @@ class DeploymentModels:
             return 0.0
     
     def hyperbole_falsehood_score(self, tweet_id):
-        """Enhanced hyperbole and falsehood detection using RoBERTa."""
+        """Call the actual Hyperbole & Falsehood detector."""
         print(f"🔍 Hyperbole detection called for tweet ID: {tweet_id}")
         
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
-                print("❌ No tweet data found")
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Hyperbole_Falsehood_detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
-                print("❌ No tweet text found")
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Hyperbole & Falsehood score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            print(f"📝 Analyzing text: '{text[:100]}...'")
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                print("✅ Using RoBERTa model for analysis")
-                roberta_score = self._analyze_text_with_roberta(text)
-                print(f"🎯 RoBERTa score: {roberta_score:.3f}")
-                return roberta_score
-            
-            # Fallback to keyword-based scoring
-            print("⚠️ Using fallback keyword-based scoring (RoBERTa not available)")
-            hyperbole_words = ['amazing', 'incredible', 'unbelievable', 'mind-blowing', 'epic', 'legendary']
-            falsehood_indicators = ['fake', 'hoax', 'conspiracy', 'cover-up', 'secret', 'hidden']
-            
-            score = 0.0
-            for word in hyperbole_words:
-                if word in text.lower():
-                    score += 0.2
-                    print(f"🔍 Found hyperbole word: {word}")
-            
-            for word in falsehood_indicators:
-                if word in text.lower():
-                    score += 0.3
-                    print(f"🔍 Found falsehood indicator: {word}")
-            
-            final_score = min(score, 1.0)
-            print(f"🎯 Fallback keyword score: {final_score:.3f}")
-            return final_score
-            
+                
         except Exception as e:
-            print(f"❌ Error in hyperbole detection: {e}")
-            import traceback
-            print(f"Full error traceback: {traceback.format_exc()}")
+            print(f"❌ Error calling hyperbole model: {e}")
             return 0.0
     
     def clickbait_score(self, tweet_id):
-        """Enhanced clickbait detection using RoBERTa."""
+        """Call the actual Clickbait Headline Classifier."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Clickbait_Headline_Classifier", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Clickbait Detection score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Clickbait-specific enhancements
-                clickbait_patterns = [
-                    'you won\'t believe', 'shocking', 'this will change everything',
-                    'number 7 will surprise you', 'what happened next', 'the truth about',
-                    'breaking', 'exclusive', 'just in', 'update', 'developing'
-                ]
-                
-                pattern_score = 0.0
-                for pattern in clickbait_patterns:
-                    if pattern.lower() in text.lower():
-                        pattern_score += 0.3
-                
-                # Punctuation analysis
-                exclamation_count = text.count('!')
-                question_count = text.count('?')
-                if exclamation_count > 2:
-                    pattern_score += 0.2
-                if question_count > 2:
-                    pattern_score += 0.15
-                
-                # Combine RoBERTa with clickbait-specific features
-                final_score = min(roberta_score * 0.6 + pattern_score * 0.4, 1.0)
-                print(f"🎯 Clickbait: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to keyword-based scoring
-            clickbait_patterns = [
-                'you won\'t believe', 'shocking', 'this will change everything',
-                'number 7 will surprise you', 'what happened next', 'the truth about'
-            ]
-            
-            score = 0.0
-            for pattern in clickbait_patterns:
-                if pattern.lower() in text.lower():
-                    score += 0.4
-            
-            # Check for excessive punctuation
-            if text.count('!') > 2 or text.count('?') > 2:
-                score += 0.2
-            
-            return min(score, 1.0)
-            
         except Exception as e:
-            print(f"Error in clickbait detection: {e}")
+            print(f"❌ Error calling clickbait model: {e}")
             return 0.0
     
     def engagement_mismatch_score(self, tweet_id):
-        """Enhanced engagement mismatch detection."""
+        """Call the actual Engagement Mismatch Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Engagement_Mismatch_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
-                return 0.0
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
             
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
-                
-                # Combine RoBERTa score with engagement metrics
-                text_length = len(text)
-                total_engagements = tweet_data.get('total_engagements', 0)
-                followers = tweet_data.get('followers_count', 1)
-                
-                # Engagement mismatch heuristic
-                engagement_ratio = total_engagements / followers if followers > 0 else 0
-                if text_length < 50 and engagement_ratio > 0.1:
-                    engagement_factor = 0.3
-                elif text_length < 100 and engagement_ratio > 0.05:
-                    engagement_factor = 0.2
-                else:
-                    engagement_factor = 0.0
-                
-                return min(roberta_score + engagement_factor, 1.0)
-            
-            # Fallback to simple heuristic
-            text_length = len(text)
-            total_engagements = tweet_data.get('total_engagements', 0)
-            followers = tweet_data.get('followers_count', 1)
-            
-            if text_length < 50 and total_engagements > followers * 0.1:
-                return 0.8
-            elif text_length < 100 and total_engagements > followers * 0.05:
-                return 0.6
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Engagement Mismatch score: {score:.3f}")
+                return score
             else:
-                return 0.2
+                print(f"❌ Model error: {result.stderr}")
+                return 0.0
                 
         except Exception as e:
-            print(f"Error in engagement mismatch detection: {e}")
+            print(f"❌ Error calling engagement mismatch model: {e}")
             return 0.0
     
     def content_recycling_score(self, tweet_id):
-        """Enhanced content recycling detection."""
+        """Call the actual Content Recycling Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Content_Recycling_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Content Recycling score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                return self._analyze_text_with_roberta(text)
-            
-            # Fallback to moderate score
-            return 0.3
-            
+                
         except Exception as e:
-            print(f"Error in content recycling detection: {e}")
+            print(f"❌ Error calling content recycling model: {e}")
             return 0.0
     
     def coordinated_network_score(self, tweet_id):
-        """Enhanced coordinated network detection."""
+        """Call the actual Coordinated Account Network Model."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Coordinated_Account_Network_Model", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            author_id = tweet_data.get('author_id')
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
             
-            if not text or not author_id:
-                return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
-                
-                # Get recent activity patterns
-                interactions = self.adapter.get_interaction_data(author_id)
-                if interactions is not None and not interactions.empty:
-                    recent_tweets = len(interactions)
-                    avg_engagement = interactions['total_engagements'].mean() if 'total_engagements' in interactions.columns else 0
-                    
-                    # Coordination indicators
-                    if recent_tweets > 50 and avg_engagement > 100:
-                        coordination_factor = 0.3
-                    elif recent_tweets > 20 and avg_engagement > 50:
-                        coordination_factor = 0.2
-                    else:
-                        coordination_factor = 0.0
-                    
-                    return min(roberta_score + coordination_factor, 1.0)
-                
-                return roberta_score
-            
-            # Fallback to simple coordination analysis
-            interactions = self.adapter.get_interaction_data(author_id)
-            if interactions is None or interactions.empty:
-                return 0.0
-            
-            recent_tweets = len(interactions)
-            avg_engagement = interactions['total_engagements'].mean() if 'total_engagements' in interactions.columns else 0
-            
-            if recent_tweets > 50 and avg_engagement > 100:
-                return 0.7
-            elif recent_tweets > 20 and avg_engagement > 50:
-                return 0.5
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Coordinated Network score: {score:.3f}")
+                return score
             else:
-                return 0.2
+                print(f"❌ Model error: {result.stderr}")
+                return 0.0
                 
         except Exception as e:
-            print(f"Error in coordinated network detection: {e}")
+            print(f"❌ Error calling coordinated network model: {e}")
             return 0.0
     
     def emotive_manipulation_score(self, tweet_id):
-        """Enhanced emotive manipulation detection using RoBERTa."""
+        """Call the actual Emotive Manipulation Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Emotive_Manipulation_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Emotive Manipulation score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Emotive manipulation-specific analysis
-                emotional_words = ['anger', 'fear', 'hate', 'love', 'hope', 'despair', 'joy', 'sadness', 
-                                 'terrified', 'ecstatic', 'devastated', 'thrilled', 'horrified', 'amazed']
-                manipulative_phrases = ['make you feel', 'you should be', 'everyone knows', 'obviously',
-                                      'clearly', 'without a doubt', 'it\'s obvious', 'anyone can see']
-                urgency_words = ['now', 'immediately', 'urgent', 'critical', 'emergency', 'last chance']
-                
-                emotional_score = 0.0
-                for word in emotional_words:
-                    if word in text.lower():
-                        emotional_score += 0.12
-                
-                manipulative_score = 0.0
-                for phrase in manipulative_phrases:
-                    if phrase in text.lower():
-                        manipulative_score += 0.25
-                
-                urgency_score = 0.0
-                for word in urgency_words:
-                    if word in text.lower():
-                        urgency_score += 0.15
-                
-                # Combine RoBERTa with emotive-specific features
-                pattern_score = min(emotional_score + manipulative_score + urgency_score, 0.8)
-                final_score = min(roberta_score * 0.5 + pattern_score * 0.5, 1.0)
-                print(f"🎯 Emotive: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to keyword-based scoring
-            emotional_words = ['anger', 'fear', 'hate', 'love', 'hope', 'despair', 'joy', 'sadness']
-            manipulative_phrases = ['make you feel', 'you should be', 'everyone knows', 'obviously']
-            
-            score = 0.0
-            for word in emotional_words:
-                if word in text.lower():
-                    score += 0.15
-            
-            for phrase in manipulative_phrases:
-                if phrase in text.lower():
-                    score += 0.3
-            
-            return min(score, 1.0)
-            
         except Exception as e:
-            print(f"Error in emotive manipulation detection: {e}")
+            print(f"❌ Error calling emotive manipulation model: {e}")
             return 0.0
     
     def rapid_engagement_spike_score(self, tweet_id):
-        """Enhanced rapid engagement spike detection."""
+        """Call the actual Rapid Engagement Spike Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Rapid_Engagement_Spike_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Rapid Engagement Spike score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Rapid engagement spike-specific analysis
-                urgency_words = ['now', 'immediately', 'urgent', 'breaking', 'live', 'developing',
-                               'just in', 'update', 'alert', 'warning', 'critical', 'emergency']
-                time_pressure = ['last chance', 'limited time', 'don\'t wait', 'act fast',
-                               'before it\'s too late', 'while supplies last']
-                viral_indicators = ['trending', 'viral', 'everyone is talking about', 'hot topic']
-                
-                urgency_score = 0.0
-                for word in urgency_words:
-                    if word in text.lower():
-                        urgency_score += 0.15
-                
-                pressure_score = 0.0
-                for phrase in time_pressure:
-                    if phrase in text.lower():
-                        pressure_score += 0.25
-                
-                viral_score = 0.0
-                for indicator in viral_indicators:
-                    if indicator in text.lower():
-                        viral_score += 0.3
-                
-                # Combine RoBERTa with urgency-specific features
-                pattern_score = min(urgency_score + pressure_score + viral_score, 0.8)
-                final_score = min(roberta_score * 0.3 + pattern_score * 0.7, 1.0)
-                print(f"🎯 Rapid Engagement: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to moderate score
-            return 0.4
-            
         except Exception as e:
-            print(f"Error in rapid engagement spike detection: {e}")
+            print(f"❌ Error calling rapid engagement spike model: {e}")
             return 0.0
     
     def generic_comment_score(self, tweet_id):
-        """Enhanced generic comment detection using RoBERTa."""
+        """Call the actual Generic Comment Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Generic_Comment_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Generic Comment score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Generic comment-specific analysis
-                generic_phrases = [
-                    'nice', 'good', 'bad', 'interesting', 'cool', 'wow', 'omg',
-                    'thanks', 'thank you', 'you\'re welcome', 'no problem', 'okay', 'sure'
-                ]
-                
-                filler_words = ['um', 'uh', 'like', 'you know', 'basically', 'literally', 'actually']
-                repetitive_patterns = ['very very', 'really really', 'so so', 'too too']
-                
-                generic_score = 0.0
-                for phrase in generic_phrases:
-                    if phrase in text.lower():
-                        generic_score += 0.15
-                
-                filler_score = 0.0
-                for word in filler_words:
-                    if word in text.lower():
-                        filler_score += 0.2
-                
-                repetitive_score = 0.0
-                for pattern in repetitive_patterns:
-                    if pattern in text.lower():
-                        repetitive_score += 0.3
-                
-                # Length penalty for very short responses
-                length_penalty = 0.0
-                if len(text) < 20:
-                    length_penalty = 0.25
-                elif len(text) < 50:
-                    length_penalty = 0.15
-                
-                # Combine RoBERTa with generic-specific features
-                pattern_score = min(generic_score + filler_score + repetitive_score + length_penalty, 0.8)
-                final_score = min(roberta_score * 0.4 + pattern_score * 0.6, 1.0)
-                print(f"🎯 Generic Comment: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to keyword-based scoring
-            generic_phrases = [
-                'nice', 'good', 'bad', 'interesting', 'cool', 'wow', 'omg',
-                'thanks', 'thank you', 'you\'re welcome', 'no problem'
-            ]
-            
-            score = 0.0
-            for phrase in generic_phrases:
-                if phrase in text.lower():
-                    score += 0.2
-            
-            # Very short generic responses
-            if len(text) < 20 and any(phrase in text.lower() for phrase in generic_phrases):
-                score += 0.3
-            
-            return min(score, 1.0)
-            
         except Exception as e:
-            print(f"Error in generic comment detection: {e}")
+            print(f"❌ Error calling generic comment model: {e}")
             return 0.0
     
     def authority_signal_score(self, tweet_id):
-        """Enhanced authority signal manipulation detection using RoBERTa."""
+        """Call the actual Authority Signal Manipulation detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Authority_Signal_Manipulation", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Authority Signal score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Authority signal-specific analysis
-                authority_claims = [
-                    'expert', 'doctor', 'scientist', 'researcher', 'official', 'authority',
-                    'studies show', 'research proves', 'experts agree', 'official source',
-                    'professor', 'phd', 'specialist', 'analyst', 'consultant', 'advisor'
-                ]
-                
-                credential_indicators = ['certified', 'licensed', 'accredited', 'verified', 'endorsed']
-                statistical_claims = ['statistics', 'data shows', 'numbers prove', 'evidence indicates']
-                
-                authority_score = 0.0
-                for claim in authority_claims:
-                    if claim in text.lower():
-                        authority_score += 0.2
-                
-                credential_score = 0.0
-                for indicator in credential_indicators:
-                    if indicator in text.lower():
-                        credential_score += 0.25
-                
-                statistical_score = 0.0
-                for claim in statistical_claims:
-                    if claim in text.lower():
-                        statistical_score += 0.3
-                
-                # Combine RoBERTa with authority-specific features
-                pattern_score = min(authority_score + credential_score + statistical_score, 0.8)
-                final_score = min(roberta_score * 0.4 + pattern_score * 0.6, 1.0)
-                print(f"🎯 Authority: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to keyword-based scoring
-            authority_claims = [
-                'expert', 'doctor', 'scientist', 'researcher', 'official', 'authority',
-                'studies show', 'research proves', 'experts agree', 'official source'
-            ]
-            
-            score = 0.0
-            for claim in authority_claims:
-                if claim in text.lower():
-                    score += 0.3
-            
-            return min(score, 1.0)
-            
         except Exception as e:
-            print(f"Error in authority signal detection: {e}")
+            print(f"❌ Error calling authority signal model: {e}")
             return 0.0
     
     def reply_bait_score(self, tweet_id):
-        """Enhanced reply-bait detection using RoBERTa."""
+        """Call the actual Reply Bait Detector."""
         try:
-            tweet_data = self.adapter.get_tweet_data(tweet_id)
-            if not tweet_data:
+            # Call the actual specialized model
+            model_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Reply_Bait_Detector", "simple_score.py")
+            
+            if not os.path.exists(model_path):
+                print(f"❌ Model not found at: {model_path}")
                 return 0.0
             
-            text = tweet_data.get('tweet_text', '')
-            if not text:
+            # Run the specialized model
+            import subprocess
+            result = subprocess.run([
+                sys.executable, model_path, str(tweet_id)
+            ], capture_output=True, text=True, cwd=os.path.dirname(model_path))
+            
+            if result.returncode == 0:
+                score = float(result.stdout.strip())
+                print(f"✅ Reply Bait score: {score:.3f}")
+                return score
+            else:
+                print(f"❌ Model error: {result.stderr}")
                 return 0.0
-            
-            # Use RoBERTa model if available
-            if self.tokenizer and self.model:
-                roberta_score = self._analyze_text_with_roberta(text)
                 
-                # Reply-bait specific analysis
-                reply_bait_patterns = [
-                    'what do you think?', 'agree?', 'thoughts?', 'opinions?',
-                    'who else?', 'am i right?', 'or is it just me?', 'change my mind',
-                    'anyone else?', 'thoughts below', 'discuss', 'debate', 'fight me'
-                ]
-                
-                engagement_questions = ['can you relate?', 'does this happen to you?', 'am i alone?',
-                                      'who else feels this?', 'raise your hand if', 'tag someone who']
-                controversial_phrases = ['unpopular opinion', 'hot take', 'controversial', 'divisive']
-                
-                bait_score = 0.0
-                for pattern in reply_bait_patterns:
-                    if pattern in text.lower():
-                        bait_score += 0.25
-                
-                engagement_score = 0.0
-                for question in engagement_questions:
-                    if question in text.lower():
-                        engagement_score += 0.3
-                
-                controversy_score = 0.0
-                for phrase in controversial_phrases:
-                    if phrase in text.lower():
-                        controversy_score += 0.25
-                
-                # Question mark analysis
-                question_marks = text.count('?')
-                if question_marks > 3:
-                    question_score = 0.3
-                elif question_marks > 1:
-                    question_score = 0.2
-                else:
-                    question_score = 0.0
-                
-                # Combine RoBERTa with reply-bait specific features
-                pattern_score = min(bait_score + engagement_score + controversy_score + question_score, 0.8)
-                final_score = min(roberta_score * 0.3 + pattern_score * 0.7, 1.0)
-                print(f"🎯 Reply Bait: RoBERTa={roberta_score:.3f}, Patterns={pattern_score:.3f}, Final={final_score:.3f}")
-                return final_score
-            
-            # Fallback to keyword-based scoring
-            reply_bait_patterns = [
-                'what do you think?', 'agree?', 'thoughts?', 'opinions?',
-                'who else?', 'am i right?', 'or is it just me?', 'change my mind'
-            ]
-            
-            score = 0.0
-            for pattern in reply_bait_patterns:
-                if pattern in text.lower():
-                    score += 0.4
-            
-            # Question marks often indicate reply-baiting
-            if text.count('?') > 2:
-                score += 0.2
-            
-            return min(score, 1.0)
-            
         except Exception as e:
-            print(f"Error in reply-bait detection: {e}")
+            print(f"❌ Error calling reply bait model: {e}")
             return 0.0
 
 # Export the deployment models
