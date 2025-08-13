@@ -262,80 +262,67 @@ def analyze_tweet_with_ecs(tweet_id):
         st.info(f"📦 ECS system type: {type(ecs_system)}")
         st.info(f"📦 ECS system methods: {[method for method in dir(ecs_system) if 'score' in method]}")
         
-        # Run all 10 models
+        # Create progress bar for overall analysis
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        # Define all models to run
+        models_to_run = [
+            ('hyperbole_falsehood', 'Hyperbole & Falsehood Detection'),
+            ('clickbait', 'Clickbait Detection'),
+            ('engagement_mismatch', 'Engagement Mismatch Detection'),
+            ('content_recycling', 'Content Recycling Detection'),
+            ('coordinated_network', 'Coordinated Network Detection'),
+            ('emotive_manipulation', 'Emotive Manipulation Detection'),
+            ('rapid_engagement_spike', 'Rapid Engagement Spike Detection'),
+            ('generic_comment', 'Generic Comment Detection'),
+            ('authority_signal', 'Authority Signal Detection'),
+            ('reply_bait', 'Reply-Bait Detection')
+        ]
+        
+        # Run all 10 models with progress tracking
         model_scores = {}
+        total_models = len(models_to_run)
         
-        st.info("🚀 Running individual models...")
+        st.info("🚀 Running specialized detection models...")
         
-        try:
-            model_scores['hyperbole_falsehood'] = ecs_system.hyperbole_falsehood_score(tweet_id)
-            st.info(f"✅ Hyperbole model: {model_scores['hyperbole_falsehood']}")
-        except Exception as e:
-            st.error(f"❌ Hyperbole model error: {e}")
-            model_scores['hyperbole_falsehood'] = 0.0
+        for i, (model_name, model_display_name) in enumerate(models_to_run):
+            # Update progress
+            progress = (i + 1) / total_models
+            progress_bar.progress(progress)
+            status_text.text(f"🔄 Running {model_display_name}... ({i+1}/{total_models})")
+            
+            try:
+                # Get the model method
+                model_method = getattr(ecs_system, f"{model_name}_score")
+                
+                # Run the model
+                score = model_method(tweet_id)
+                model_scores[model_name] = score
+                
+                # Show success for this model with color coding
+                if score < 0.4:
+                    st.success(f"✅ {model_display_name}: {score:.3f} (Low Risk)")
+                elif score < 0.7:
+                    st.warning(f"⚠️ {model_display_name}: {score:.3f} (Medium Risk)")
+                else:
+                    st.error(f"🚨 {model_display_name}: {score:.3f} (High Risk)")
+                
+                # Small delay to make progress visible
+                time.sleep(0.1)
+                
+            except Exception as e:
+                st.error(f"❌ {model_display_name} error: {e}")
+                model_scores[model_name] = 0.0
         
-        try:
-            model_scores['clickbait'] = ecs_system.clickbait_score(tweet_id)
-            st.info(f"✅ Clickbait model: {model_scores['clickbait']}")
-        except Exception as e:
-            st.error(f"❌ Clickbait model error: {e}")
-            model_scores['clickbait'] = 0.0
+        # Complete progress bar
+        progress_bar.progress(1.0)
+        status_text.text("🎯 All models completed! Calculating composite score...")
         
-        try:
-            model_scores['engagement_mismatch'] = ecs_system.engagement_mismatch_score(tweet_id)
-            st.info(f"✅ Engagement mismatch model: {model_scores['engagement_mismatch']}")
-        except Exception as e:
-            st.error(f"❌ Engagement mismatch model error: {e}")
-            model_scores['engagement_mismatch'] = 0.0
-        
-        try:
-            model_scores['content_recycling'] = ecs_system.content_recycling_score(tweet_id)
-            st.info(f"✅ Content recycling model: {model_scores['content_recycling']}")
-        except Exception as e:
-            st.error(f"❌ Content recycling model error: {e}")
-            model_scores['content_recycling'] = 0.0
-        
-        try:
-            model_scores['coordinated_network'] = ecs_system.coordinated_network_score(tweet_id)
-            st.info(f"✅ Coordinated network model: {model_scores['coordinated_network']}")
-        except Exception as e:
-            st.error(f"❌ Coordinated network model error: {e}")
-            model_scores['coordinated_network'] = 0.0
-        
-        try:
-            model_scores['emotive_manipulation'] = ecs_system.emotive_manipulation_score(tweet_id)
-            st.info(f"✅ Emotive manipulation model: {model_scores['emotive_manipulation']}")
-        except Exception as e:
-            st.error(f"❌ Emotive manipulation model error: {e}")
-            model_scores['emotive_manipulation'] = 0.0
-        
-        try:
-            model_scores['rapid_engagement_spike'] = ecs_system.rapid_engagement_spike_score(tweet_id)
-            st.info(f"✅ Rapid engagement spike model: {model_scores['rapid_engagement_spike']}")
-        except Exception as e:
-            st.error(f"❌ Rapid engagement spike model error: {e}")
-            model_scores['rapid_engagement_spike'] = 0.0
-        
-        try:
-            model_scores['generic_comment'] = ecs_system.generic_comment_score(tweet_id)
-            st.info(f"✅ Generic comment model: {model_scores['generic_comment']}")
-        except Exception as e:
-            st.error(f"❌ Generic comment model error: {e}")
-            model_scores['generic_comment'] = 0.0
-        
-        try:
-            model_scores['authority_signal'] = ecs_system.authority_signal_score(tweet_id)
-            st.info(f"✅ Authority signal model: {model_scores['authority_signal']}")
-        except Exception as e:
-            st.error(f"❌ Authority signal model error: {e}")
-            model_scores['authority_signal'] = 0.0
-        
-        try:
-            model_scores['reply_bait'] = ecs_system.reply_bait_score(tweet_id)
-            st.info(f"✅ Reply bait model: {model_scores['reply_bait']}")
-        except Exception as e:
-            st.error(f"❌ Reply bait model error: {e}")
-            model_scores['reply_bait'] = 0.0
+        # Clear progress indicators after a moment
+        time.sleep(0.5)
+        progress_bar.empty()
+        status_text.empty()
         
         st.info(f"📊 All models completed. Scores: {model_scores}")
         
