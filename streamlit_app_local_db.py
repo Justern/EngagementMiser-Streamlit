@@ -275,14 +275,14 @@ def analyze_tweet_with_ecs(tweet_id):
         models_to_run = [
             ('hyperbole_falsehood_score', 'Hyperbole & Falsehood'),
             ('clickbait_score', 'Clickbait Detection'),
-            ('emotive_manipulation_score', 'Emotional Manipulation'),
-            ('authority_signal_score', 'Authority Appeal'),
-            ('rapid_engagement_spike_score', 'Urgency & Scarcity'),
-            ('coordinated_network_score', 'Social Proof'),
-            ('engagement_mismatch_score', 'Reciprocity'),
-            ('content_recycling_score', 'Commitment & Consistency'),
-            ('generic_comment_score', 'Liking & Similarity'),
-            ('reply_bait_score', 'Scarcity & Loss Aversion')
+            ('emotive_manipulation_score', 'Emotive Manipulation'),
+            ('authority_signal_score', 'Authority Signal'),
+            ('rapid_engagement_spike_score', 'Rapid Engagement Spike'),
+            ('coordinated_network_score', 'Coordinated Network'),
+            ('engagement_mismatch_score', 'Engagement Mismatch'),
+            ('content_recycling_score', 'Content Recycling'),
+            ('generic_comment_score', 'Generic Comment'),
+            ('reply_bait_score', 'Reply Bait')
         ]
         
         for i, (model_method, model_display_name) in enumerate(models_to_run):
@@ -328,14 +328,14 @@ def analyze_tweet_with_ecs(tweet_id):
         weights = {
             'Hyperbole & Falsehood': 0.15,
             'Clickbait Detection': 0.15,
-            'Emotional Manipulation': 0.12,
-            'Authority Appeal': 0.10,
-            'Urgency & Scarcity': 0.10,
-            'Social Proof': 0.08,
-            'Reciprocity': 0.08,
-            'Commitment & Consistency': 0.07,
-            'Liking & Similarity': 0.08,
-            'Scarcity & Loss Aversion': 0.07
+            'Emotive Manipulation': 0.12,
+            'Authority Signal': 0.10,
+            'Rapid Engagement Spike': 0.10,
+            'Coordinated Network': 0.08,
+            'Engagement Mismatch': 0.08,
+            'Content Recycling': 0.07,
+            'Generic Comment': 0.08,
+            'Reply Bait': 0.07
         }
         
         composite_score = sum(
