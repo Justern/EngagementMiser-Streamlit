@@ -178,11 +178,40 @@ def load_ecs_system():
     """Load the deployment-ready ECS system with Azure database integration."""
     try:
         with st.spinner("Loading Engagement Concordance Score system..."):
+            st.info("🔄 Attempting to import deployment models...")
+            
             # Import the deployment models
             from deployment_config import deployment_models
             
+            st.info(f"📦 Imported deployment_models: {type(deployment_models)}")
+            
             # Check if models are available
             if deployment_models:
+                st.info("🔍 Checking model methods...")
+                
+                # Check if all 10 model methods exist
+                required_methods = [
+                    'hyperbole_falsehood_score',
+                    'clickbait_score', 
+                    'engagement_mismatch_score',
+                    'content_recycling_score',
+                    'coordinated_network_score',
+                    'emotive_manipulation_score',
+                    'rapid_engagement_spike_score',
+                    'generic_comment_score',
+                    'authority_signal_score',
+                    'reply_bait_score'
+                ]
+                
+                missing_methods = []
+                for method in required_methods:
+                    if not hasattr(deployment_models, method):
+                        missing_methods.append(method)
+                
+                if missing_methods:
+                    st.warning(f"⚠️ Missing model methods: {missing_methods}")
+                    return None
+                
                 st.success("✅ ECS system loaded successfully with Azure database integration!")
                 st.info("All 10 specialized detection models are ready for analysis.")
                 return deployment_models
@@ -193,6 +222,8 @@ def load_ecs_system():
     except Exception as e:
         st.error(f"❌ Error loading ECS system: {e}")
         st.info("Please ensure deployment_config.py is available.")
+        import traceback
+        st.error(f"Full error: {traceback.format_exc()}")
         return None
 
 def analyze_text_with_ecs(tweet_text):
@@ -221,22 +252,92 @@ def analyze_text_with_ecs(tweet_text):
 def analyze_tweet_with_ecs(tweet_id):
     """Analyze a tweet using the ECS system with all 10 models."""
     try:
+        st.info(f"🔍 Starting analysis for tweet ID: {tweet_id}")
+        
         ecs_system = st.session_state.get('ecs_system')
         if not ecs_system:
+            st.error("❌ ECS system not found in session state")
             return None
+        
+        st.info(f"📦 ECS system type: {type(ecs_system)}")
+        st.info(f"📦 ECS system methods: {[method for method in dir(ecs_system) if 'score' in method]}")
         
         # Run all 10 models
         model_scores = {}
-        model_scores['hyperbole_falsehood'] = ecs_system.hyperbole_falsehood_score(tweet_id)
-        model_scores['clickbait'] = ecs_system.clickbait_score(tweet_id)
-        model_scores['engagement_mismatch'] = ecs_system.engagement_mismatch_score(tweet_id)
-        model_scores['content_recycling'] = ecs_system.content_recycling_score(tweet_id)
-        model_scores['coordinated_network'] = ecs_system.coordinated_network_score(tweet_id)
-        model_scores['emotive_manipulation'] = ecs_system.emotive_manipulation_score(tweet_id)
-        model_scores['rapid_engagement_spike'] = ecs_system.rapid_engagement_spike_score(tweet_id)
-        model_scores['generic_comment'] = ecs_system.generic_comment_score(tweet_id)
-        model_scores['authority_signal'] = ecs_system.authority_signal_score(tweet_id)
-        model_scores['reply_bait'] = ecs_system.reply_bait_score(tweet_id)
+        
+        st.info("🚀 Running individual models...")
+        
+        try:
+            model_scores['hyperbole_falsehood'] = ecs_system.hyperbole_falsehood_score(tweet_id)
+            st.info(f"✅ Hyperbole model: {model_scores['hyperbole_falsehood']}")
+        except Exception as e:
+            st.error(f"❌ Hyperbole model error: {e}")
+            model_scores['hyperbole_falsehood'] = 0.0
+        
+        try:
+            model_scores['clickbait'] = ecs_system.clickbait_score(tweet_id)
+            st.info(f"✅ Clickbait model: {model_scores['clickbait']}")
+        except Exception as e:
+            st.error(f"❌ Clickbait model error: {e}")
+            model_scores['clickbait'] = 0.0
+        
+        try:
+            model_scores['engagement_mismatch'] = ecs_system.engagement_mismatch_score(tweet_id)
+            st.info(f"✅ Engagement mismatch model: {model_scores['engagement_mismatch']}")
+        except Exception as e:
+            st.error(f"❌ Engagement mismatch model error: {e}")
+            model_scores['engagement_mismatch'] = 0.0
+        
+        try:
+            model_scores['content_recycling'] = ecs_system.content_recycling_score(tweet_id)
+            st.info(f"✅ Content recycling model: {model_scores['content_recycling']}")
+        except Exception as e:
+            st.error(f"❌ Content recycling model error: {e}")
+            model_scores['content_recycling'] = 0.0
+        
+        try:
+            model_scores['coordinated_network'] = ecs_system.coordinated_network_score(tweet_id)
+            st.info(f"✅ Coordinated network model: {model_scores['coordinated_network']}")
+        except Exception as e:
+            st.error(f"❌ Coordinated network model error: {e}")
+            model_scores['coordinated_network'] = 0.0
+        
+        try:
+            model_scores['emotive_manipulation'] = ecs_system.emotive_manipulation_score(tweet_id)
+            st.info(f"✅ Emotive manipulation model: {model_scores['emotive_manipulation']}")
+        except Exception as e:
+            st.error(f"❌ Emotive manipulation model error: {e}")
+            model_scores['emotive_manipulation'] = 0.0
+        
+        try:
+            model_scores['rapid_engagement_spike'] = ecs_system.rapid_engagement_spike_score(tweet_id)
+            st.info(f"✅ Rapid engagement spike model: {model_scores['rapid_engagement_spike']}")
+        except Exception as e:
+            st.error(f"❌ Rapid engagement spike model error: {e}")
+            model_scores['rapid_engagement_spike'] = 0.0
+        
+        try:
+            model_scores['generic_comment'] = ecs_system.generic_comment_score(tweet_id)
+            st.info(f"✅ Generic comment model: {model_scores['generic_comment']}")
+        except Exception as e:
+            st.error(f"❌ Generic comment model error: {e}")
+            model_scores['generic_comment'] = 0.0
+        
+        try:
+            model_scores['authority_signal'] = ecs_system.authority_signal_score(tweet_id)
+            st.info(f"✅ Authority signal model: {model_scores['authority_signal']}")
+        except Exception as e:
+            st.error(f"❌ Authority signal model error: {e}")
+            model_scores['authority_signal'] = 0.0
+        
+        try:
+            model_scores['reply_bait'] = ecs_system.reply_bait_score(tweet_id)
+            st.info(f"✅ Reply bait model: {model_scores['reply_bait']}")
+        except Exception as e:
+            st.error(f"❌ Reply bait model error: {e}")
+            model_scores['reply_bait'] = 0.0
+        
+        st.info(f"📊 All models completed. Scores: {model_scores}")
         
         # Calculate weighted composite score
         weights = {
@@ -255,6 +356,8 @@ def analyze_tweet_with_ecs(tweet_id):
         total_weight = sum(weights.values())
         weighted_sum = sum(model_scores[model] * weights[model] for model in model_scores)
         composite_score = weighted_sum / total_weight
+        
+        st.info(f"🎯 Composite score calculated: {composite_score}")
         
         # Determine risk level
         if composite_score < 0.4:
@@ -280,14 +383,16 @@ def analyze_tweet_with_ecs(tweet_id):
         
     except Exception as e:
         st.error(f"❌ Error analyzing tweet: {e}")
+        import traceback
+        st.error(f"Full error: {traceback.format_exc()}")
         return None
 
 def show_tweet_selection():
     """Show a dropdown to select from available tweets in the database."""
     st.subheader("📊 Select Tweet from Database")
     
-    # Fetch tweets from database
-    tweets = fetch_tweets_from_database(limit=50)
+    # Fetch ALL tweets from database (not just 50)
+    tweets = fetch_tweets_from_database(limit=1020)
     
     if not tweets:
         st.warning("No tweets found in database. Please ensure your database connection is working.")
@@ -300,13 +405,13 @@ def show_tweet_selection():
     tweet_options = []
     for tweet in tweets:
         # Truncate tweet text for display
-        display_text = tweet['tweet_text'][:100] + "..." if len(tweet['tweet_text']) > 100 else tweet['tweet_text']
+        display_text = tweet['tweet_text'][:80] + "..." if len(tweet['tweet_text']) > 80 else tweet['tweet_text']
         
-        # Format the option text
+        # Format the option text with more info
         option_text = f"ID: {tweet['tweet_id']} | {display_text}"
         tweet_options.append((option_text, tweet['tweet_id']))
     
-    # Create dropdown
+    # Create dropdown with search functionality
     selected_option = st.selectbox(
         "Choose a tweet to analyze:",
         options=[opt[0] for opt in tweet_options],
@@ -327,7 +432,7 @@ def show_tweet_selection():
         if tweet_data:
             st.success(f"✅ Selected Tweet ID: {selected_tweet_id}")
             
-            # Display tweet information
+            # Display tweet information in a cleaner format
             col1, col2 = st.columns(2)
             with col1:
                 st.write("**Tweet Text:**")
@@ -389,7 +494,7 @@ def show_live_analysis():
             st.write("Tweet ID copied! You can now paste it in the scoring section.")
     
     st.write("---")
-    st.write("**Or manually enter a Tweet ID below:**")
+    st.write("**Use the Tweet ID above or manually enter one below:**")
     
     # Manual tweet ID input
     tweet_id_input = st.text_input(
