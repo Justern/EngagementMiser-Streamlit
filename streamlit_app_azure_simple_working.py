@@ -88,7 +88,7 @@ def fetch_popular_entities(_engine, limit=4000):
             frequency,
             engagement_score,
             risk_level
-        FROM [EngagementMiser].[dbo].[Popular_Entities_Corpus]
+        FROM [dbo].[Popular_Entities_Corpus]
         ORDER BY frequency DESC, engagement_score DESC
         """
         
@@ -117,7 +117,7 @@ def fetch_tweets_sample(_engine, sample_size=2000):
             follower_count,
             verified,
             account_age_days
-        FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
+        FROM [dbo].[Tweets_Sample_4M]
         ORDER BY NEWID()
         """
         
