@@ -1122,8 +1122,8 @@ def show_tweet_selection(engine):
 
 def main():
     """Main application function."""
-    st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
-         st.markdown("### ECS Model System - Social Media Manipulation Detection")
+         st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
+     st.markdown("### ECS Model System - Social Media Manipulation Detection")
     
     # Sidebar navigation
     st.sidebar.title("Navigation")
