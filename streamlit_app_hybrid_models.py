@@ -356,13 +356,24 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
 # ============================================================================
 
 def calculate_authority_signal_manipulation_score(tweet_id, engine):
-    """Calculate Authority Signal Manipulation score using rule-based logic."""
+    """Calculate Authority Signal Manipulation score using the REAL logic from your model."""
     try:
-        # Get tweet data from Azure (simplified to avoid JOIN issues)
+        # Get tweet data from Azure using your actual query structure
         query = """
-        SELECT text, author_id, followers_count, created_at
-        FROM [dbo].[Tweets_Sample_4M]
-        WHERE tweet_id = :tweet_id
+            SELECT TOP 1 
+                t.text,
+                t.author_id,
+                t.like_count,
+                t.retweet_count,
+                t.reply_count,
+                t.quote_count,
+                u.followers_count,
+                u.following_count,
+                u.verified,
+                u.description
+            FROM [dbo].[Tweets_Sample_4M] t
+            JOIN [dbo].[TwitterUsers] u ON t.author_id = u.id
+            WHERE CAST(t.tweet_id AS VARCHAR(32)) = :tweet_id
         """
         
         with engine.connect() as conn:
@@ -370,39 +381,97 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
             result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-            return 0.0
+            st.warning("Tweet not found or JOIN failed, using simplified logic")
+            # Fallback to simplified query if JOIN fails
+            fallback_query = """
+                SELECT text, author_id, followers_count
+                FROM [dbo].[Tweets_Sample_4M]
+                WHERE tweet_id = :tweet_id
+            """
+            fallback_result = conn.execute(text(fallback_query), {"tweet_id": str(tweet_id)}).fetchone()
+            
+            if not fallback_result:
+                return 0.0
+            
+            # Use simplified data
+            tweet_data = {
+                'text': str(fallback_result[0]),
+                'author_id': str(fallback_result[1]),
+                'followers_count': int(fallback_result[2]) if fallback_result[2] else 0,
+                'following_count': 1000,  # Default
+                'verified': False,  # Default
+                'description': ''
+            }
+        else:
+            # Use full data from JOIN
+            tweet_data = {
+                'text': str(result[0]),
+                'author_id': str(result[1]),
+                'like_count': int(result[2]) if result[2] else 0,
+                'retweet_count': int(result[3]) if result[3] else 0,
+                'reply_count': int(result[4]) if result[4] else 0,
+                'quote_count': int(result[5]) if result[5] else 0,
+                'followers_count': int(result[6]) if result[6] else 0,
+                'following_count': int(result[7]) if result[7] else 0,
+                'verified': bool(result[8]) if result[8] else False,
+                'description': str(result[9]) if result[9] else ''
+            }
         
-        tweet_text = result[0].lower()
-        followers_count = result[2] or 0
-        verified = False  # Default value since we don't have this column
-        account_age_days = 365  # Default value since we don't have this column
-        
-        # Authority phrases detection
-        authority_phrases = [
-            'expert', 'professional', 'specialist', 'consultant', 'advisor',
-            'researcher', 'scientist', 'doctor', 'professor', 'analyst',
-            'strategist', 'expertise', 'authority', 'certified', 'licensed'
-        ]
-        
-        authority_score = sum(1 for phrase in authority_phrases if phrase in tweet_text)
-        authority_score = min(authority_score / 5, 1.0)  # Normalize to 0-1
-        
-        # Profile mismatch detection
-        profile_score = 0.0
-        if authority_score > 0.3:  # If claiming authority
-            if followers_count < 1000 and not verified:
-                profile_score = 0.8  # High suspicion
-            elif followers_count < 5000 and account_age_days < 365:
-                profile_score = 0.6  # Medium suspicion
-            elif followers_count < 10000:
-                profile_score = 0.4  # Low suspicion
-        
-        # Final score combines both factors
-        final_score = (authority_score * 0.4) + (profile_score * 0.6)
-        return min(final_score, 1.0)
+        # Use your ACTUAL authority signal logic
+        return calculate_simple_authority_score(tweet_data)
         
     except Exception as e:
         st.warning(f"Authority Signal Manipulation failed: {e}")
+        return 0.0
+
+def calculate_simple_authority_score(tweet_data: dict) -> float:
+    """Calculate authority signal manipulation score using your REAL logic."""
+    if not tweet_data:
+        return 0.0
+    
+    try:
+        text = tweet_data['text'].lower()
+        followers = tweet_data['followers_count']
+        following = tweet_data['following_count']
+        verified = tweet_data['verified']
+        
+        # Your actual authority manipulation indicators
+        authority_phrases = [
+            'expert', 'professional', 'doctor', 'scientist', 'researcher',
+            'study shows', 'research proves', 'experts agree', 'authority',
+            'scientifically proven', 'clinically tested', 'doctor recommended',
+            'according to science', 'research indicates', 'studies confirm',
+            'medical evidence', 'scientific evidence', 'clinical evidence',
+            'expert opinion', 'professional opinion', 'authority figure'
+        ]
+        
+        # Count authority phrases (your logic)
+        authority_count = sum(1 for phrase in authority_phrases if phrase in text)
+        
+        # Profile mismatch indicators (your logic)
+        profile_mismatch = 0
+        
+        # High authority language but low follower count
+        if authority_count > 0 and followers < 1000:
+            profile_mismatch += 0.3
+        
+        # High authority language but not verified
+        if authority_count > 0 and not verified:
+            profile_mismatch += 0.2
+        
+        # Very high following to follower ratio (suspicious)
+        if following > 0 and followers > 0:
+            ratio = following / followers
+            if ratio > 10:  # Following 10x more than followers
+                profile_mismatch += 0.2
+        
+        # Calculate score using your formula
+        authority_ratio = min(authority_count / 5, 1.0)  # Normalize to 0-1
+        final_score = (authority_ratio * 0.6) + (profile_mismatch * 0.4)
+        
+        return max(0.0, min(1.0, final_score))
+        
+    except Exception as e:
         return 0.0
 
 def calculate_coordinated_account_network_score(tweet_id, engine):
