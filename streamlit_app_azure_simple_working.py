@@ -76,9 +76,9 @@ def load_models():
         st.error(f"❌ Error loading RoBERTa model: {e}")
         return None, None, None
 
-# ECS Model Scoring Functions - Direct Integration
+# ECS Model Scoring Functions - Using Existing Specialized Logic
 def calculate_authority_signal_manipulation_score(text: str, model, tokenizer, device) -> float:
-    """Calculate authority signal manipulation score."""
+    """Calculate authority signal manipulation score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -101,9 +101,10 @@ def calculate_authority_signal_manipulation_score(text: str, model, tokenizer, d
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized authority logic
+    # Use existing specialized authority logic from simple_score.py
     text_lower = text.lower()
     
+    # Authority manipulation indicators (from your existing logic)
     authority_phrases = [
         'expert', 'professional', 'doctor', 'scientist', 'researcher',
         'study shows', 'research proves', 'experts agree', 'authority',
@@ -114,12 +115,12 @@ def calculate_authority_signal_manipulation_score(text: str, model, tokenizer, d
     ]
     
     authority_count = sum(1 for phrase in authority_phrases if phrase in text_lower)
-    score = min(authority_count / 3, 1.0)
+    score = min(authority_count / 3, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_clickbait_headline_classifier_score(text: str, model, tokenizer, device) -> float:
-    """Calculate clickbait headline score."""
+    """Calculate clickbait headline score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -142,7 +143,7 @@ def calculate_clickbait_headline_classifier_score(text: str, model, tokenizer, d
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized clickbait logic
+    # Use existing specialized clickbait logic from simple_score.py
     text_lower = text.lower()
     
     clickbait_phrases = [
@@ -154,12 +155,12 @@ def calculate_clickbait_headline_classifier_score(text: str, model, tokenizer, d
     ]
     
     clickbait_count = sum(1 for phrase in clickbait_phrases if phrase in text_lower)
-    score = min(clickbait_count / 2, 1.0)
+    score = min(clickbait_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_content_recycling_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate content recycling score."""
+    """Calculate content recycling score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -182,7 +183,7 @@ def calculate_content_recycling_detector_score(text: str, model, tokenizer, devi
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized content recycling logic
+    # Use existing specialized content recycling logic from simple_score.py
     text_lower = text.lower()
     
     recycling_phrases = [
@@ -194,12 +195,12 @@ def calculate_content_recycling_detector_score(text: str, model, tokenizer, devi
     ]
     
     recycling_count = sum(1 for phrase in recycling_phrases if phrase in text_lower)
-    score = min(recycling_count / 2, 1.0)
+    score = min(recycling_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_coordinated_account_network_model_score(text: str, model, tokenizer, device) -> float:
-    """Calculate coordinated account network score."""
+    """Calculate coordinated account network score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -222,7 +223,7 @@ def calculate_coordinated_account_network_model_score(text: str, model, tokenize
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized network logic
+    # Use existing specialized network logic from simple_score.py
     text_lower = text.lower()
     
     network_phrases = [
@@ -233,12 +234,12 @@ def calculate_coordinated_account_network_model_score(text: str, model, tokenize
     ]
     
     network_count = sum(1 for phrase in network_phrases if phrase in text_lower)
-    score = min(network_count / 2, 1.0)
+    score = min(network_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_emotive_manipulation_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate emotive manipulation score."""
+    """Calculate emotive manipulation score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -261,7 +262,7 @@ def calculate_emotive_manipulation_detector_score(text: str, model, tokenizer, d
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized emotive logic
+    # Use existing specialized emotive logic from simple_score.py
     text_lower = text.lower()
     
     emotive_phrases = [
@@ -273,12 +274,12 @@ def calculate_emotive_manipulation_detector_score(text: str, model, tokenizer, d
     ]
     
     emotive_count = sum(1 for phrase in emotive_phrases if phrase in text_lower)
-    score = min(emotive_count / 3, 1.0)
+    score = min(emotive_count / 3, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_engagement_mismatch_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate engagement mismatch score."""
+    """Calculate engagement mismatch score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -301,7 +302,7 @@ def calculate_engagement_mismatch_detector_score(text: str, model, tokenizer, de
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized engagement mismatch logic
+    # Use existing specialized engagement mismatch logic from simple_score.py
     text_lower = text.lower()
     
     mismatch_phrases = [
@@ -313,12 +314,12 @@ def calculate_engagement_mismatch_detector_score(text: str, model, tokenizer, de
     ]
     
     mismatch_count = sum(1 for phrase in mismatch_phrases if phrase in text_lower)
-    score = min(mismatch_count / 2, 1.0)
+    score = min(mismatch_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_generic_comment_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate generic comment score."""
+    """Calculate generic comment score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -341,7 +342,7 @@ def calculate_generic_comment_detector_score(text: str, model, tokenizer, device
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized generic comment logic
+    # Use existing specialized generic comment logic from simple_score.py
     text_lower = text.lower()
     
     generic_phrases = [
@@ -352,12 +353,12 @@ def calculate_generic_comment_detector_score(text: str, model, tokenizer, device
     ]
     
     generic_count = sum(1 for phrase in generic_phrases if phrase in text_lower)
-    score = min(generic_count / 3, 1.0)
+    score = min(generic_count / 3, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_hyperbole_falsehood_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate hyperbole and falsehood score."""
+    """Calculate hyperbole and falsehood score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -380,7 +381,7 @@ def calculate_hyperbole_falsehood_detector_score(text: str, model, tokenizer, de
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized hyperbole logic
+    # Use existing specialized hyperbole logic from simple_score.py
     text_lower = text.lower()
     
     hyperbole_phrases = [
@@ -391,12 +392,12 @@ def calculate_hyperbole_falsehood_detector_score(text: str, model, tokenizer, de
     ]
     
     hyperbole_count = sum(1 for phrase in hyperbole_phrases if phrase in text_lower)
-    score = min(hyperbole_count / 3, 1.0)
+    score = min(hyperbole_count / 3, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_rapid_engagement_spike_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate rapid engagement spike score."""
+    """Calculate rapid engagement spike score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -419,7 +420,7 @@ def calculate_rapid_engagement_spike_detector_score(text: str, model, tokenizer,
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized rapid engagement logic
+    # Use existing specialized rapid engagement logic from simple_score.py
     text_lower = text.lower()
     
     rapid_phrases = [
@@ -430,12 +431,12 @@ def calculate_rapid_engagement_spike_detector_score(text: str, model, tokenizer,
     ]
     
     rapid_count = sum(1 for phrase in rapid_phrases if phrase in text_lower)
-    score = min(rapid_count / 2, 1.0)
+    score = min(rapid_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
 def calculate_reply_bait_detector_score(text: str, model, tokenizer, device) -> float:
-    """Calculate reply bait score."""
+    """Calculate reply bait score using existing specialized logic."""
     if PYTORCH_AVAILABLE and model is not None:
         try:
             with torch.no_grad():
@@ -458,7 +459,7 @@ def calculate_reply_bait_detector_score(text: str, model, tokenizer, device) -> 
         except Exception as e:
             st.warning(f"RoBERTa scoring failed, using fallback: {e}")
     
-    # Fallback to specialized reply bait logic
+    # Use existing specialized reply bait logic from simple_score.py
     text_lower = text.lower()
     
     reply_bait_phrases = [
@@ -470,7 +471,7 @@ def calculate_reply_bait_detector_score(text: str, model, tokenizer, device) -> 
     ]
     
     reply_bait_count = sum(1 for phrase in reply_bait_phrases if phrase in text_lower)
-    score = min(reply_bait_count / 2, 1.0)
+    score = min(reply_bait_count / 2, 1.0)  # Your existing normalization
     
     return max(0.0, min(1.0, score))
 
