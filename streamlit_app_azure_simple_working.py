@@ -156,10 +156,10 @@ def show_tweet_selection(engine):
             st.write(selected_tweet['tweet_text'])
             
             if st.button("🔍 Analyze This Tweet"):
-                # Simple analysis without complex models
-                st.subheader("📊 Tweet Analysis")
-                
-                                 col1, col2, col3, col4 = st.columns(4)
+                                 # Simple analysis without complex models
+                 st.subheader("📊 Tweet Analysis")
+                 
+                 col1, col2, col3, col4 = st.columns(4)
                  with col1:
                      st.metric("Likes", selected_tweet['like_count'])
                  with col2:
@@ -173,10 +173,10 @@ def show_tweet_selection(engine):
                  st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
                  st.write(f"**Created:** {selected_tweet['created_at']}")
                  st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
-                
-                # Simple engagement score
-                engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
-                st.metric("Engagement Rate", f"{engagement:.3f}")
+                 
+                 # Simple engagement score
+                 engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
+                 st.metric("Engagement Rate", f"{engagement:.3f}")
 
 def show_popular_entities_analysis(engine):
     """Show popular entities analysis."""
