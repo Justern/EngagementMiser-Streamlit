@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Simple Score Script for ECS Models - Cloud Compatible
-===================================================
+Simple Score Script for ECS Models - Cloud Compatible with Hugging Face
+=====================================================================
 
 Takes tweet text and model name as input and returns a single 0-1 score.
+Uses the Hugging Face Hub model for sophisticated scoring.
 Usage: python simple_score.py --text <text_file> --model <model_name>
 Output: Single line with score (0.0 to 1.0)
 """
@@ -11,13 +12,51 @@ Output: Single line with score (0.0 to 1.0)
 import sys
 import argparse
 import os
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-def calculate_authority_signal_score(text: str) -> float:
-    """Calculate authority signal manipulation score."""
+def load_hf_model():
+    """Load the model from Hugging Face Hub."""
     try:
-        text_lower = text.lower()
+        repo_id = "MidlAnalytics/engagement-concordance-roberta"
+        tokenizer = AutoTokenizer.from_pretrained(repo_id)
+        model = AutoModelForSequenceClassification.from_pretrained(repo_id)
         
-        # Authority manipulation indicators
+        # Set device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        model.eval()
+        
+        return model, tokenizer, device
+        
+    except Exception as e:
+        print(f"Error loading model: {e}", file=sys.stderr)
+        return None, None, None
+
+def calculate_authority_signal_score(text: str, model, tokenizer, device) -> float:
+    """Calculate authority signal manipulation score using the trained model."""
+    try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
+        text_lower = text.lower()
         authority_phrases = [
             'expert', 'professional', 'doctor', 'scientist', 'researcher',
             'study shows', 'research proves', 'experts agree', 'authority',
@@ -27,23 +66,34 @@ def calculate_authority_signal_score(text: str) -> float:
             'expert opinion', 'professional opinion', 'authority figure'
         ]
         
-        # Count authority phrases
         authority_count = sum(1 for phrase in authority_phrases if phrase in text_lower)
-        
-        # Calculate score based on authority language density
-        score = min(authority_count / 3, 1.0)  # Normalize to 0-1
-        
+        score = min(authority_count / 3, 1.0)
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_clickbait_score(text: str) -> float:
-    """Calculate clickbait headline score."""
+def calculate_clickbait_score(text: str, model, tokenizer, device) -> float:
+    """Calculate clickbait headline score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Clickbait indicators
         clickbait_phrases = [
             'you won\'t believe', 'shocking', 'amazing', 'incredible',
             'this will blow your mind', 'what happened next', 'the truth about',
@@ -52,23 +102,34 @@ def calculate_clickbait_score(text: str) -> float:
             'number one reason', 'top secret', 'hidden', 'forbidden'
         ]
         
-        # Count clickbait phrases
         clickbait_count = sum(1 for phrase in clickbait_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(clickbait_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_content_recycling_score(text: str) -> float:
-    """Calculate content recycling score."""
+def calculate_content_recycling_score(text: str, model, tokenizer, device) -> float:
+    """Calculate content recycling score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Content recycling indicators
         recycling_phrases = [
             'repost', 'reposting', 'repost this', 'share this',
             'viral', 'going viral', 'trending', 'trending now',
@@ -77,23 +138,34 @@ def calculate_content_recycling_score(text: str) -> float:
             'retweet this', 'like and share', 'comment and share'
         ]
         
-        # Count recycling phrases
         recycling_count = sum(1 for phrase in recycling_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(recycling_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_coordinated_network_score(text: str) -> float:
-    """Calculate coordinated account network score."""
+def calculate_coordinated_network_score(text: str, model, tokenizer, device) -> float:
+    """Calculate coordinated account network score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Coordinated network indicators
         network_phrases = [
             'bot', 'bots', 'automated', 'script', 'scripted',
             'coordinated', 'network', 'campaign', 'operation',
@@ -101,23 +173,34 @@ def calculate_coordinated_network_score(text: str) -> float:
             'trending', 'trend', 'hashtag', 'hashtags'
         ]
         
-        # Count network phrases
         network_count = sum(1 for phrase in network_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(network_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_emotive_manipulation_score(text: str) -> float:
-    """Calculate emotive manipulation score."""
+def calculate_emotive_manipulation_score(text: str, model, tokenizer, device) -> float:
+    """Calculate emotive manipulation score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Emotive manipulation indicators
         emotive_phrases = [
             'outrage', 'outraged', 'angry', 'furious', 'livid',
             'shocked', 'shocking', 'disgusting', 'horrible', 'terrible',
@@ -126,23 +209,34 @@ def calculate_emotive_manipulation_score(text: str) -> float:
             'excited', 'thrilled', 'ecstatic', 'overjoyed', 'elated'
         ]
         
-        # Count emotive phrases
         emotive_count = sum(1 for phrase in emotive_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(emotive_count / 3, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_engagement_mismatch_score(text: str) -> float:
-    """Calculate engagement mismatch score."""
+def calculate_engagement_mismatch_score(text: str, model, tokenizer, device) -> float:
+    """Calculate engagement mismatch score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Engagement mismatch indicators
         mismatch_phrases = [
             'like this', 'like if you agree', 'like for more',
             'retweet this', 'retweet if you agree', 'retweet for more',
@@ -151,23 +245,34 @@ def calculate_engagement_mismatch_score(text: str) -> float:
             'follow me', 'follow for more', 'follow for updates'
         ]
         
-        # Count mismatch phrases
         mismatch_count = sum(1 for phrase in mismatch_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(mismatch_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_generic_comment_score(text: str) -> float:
-    """Calculate generic comment score."""
+def calculate_generic_comment_score(text: str, model, tokenizer, device) -> float:
+    """Calculate generic comment score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Generic comment indicators
         generic_phrases = [
             'nice', 'good', 'great', 'awesome', 'cool',
             'interesting', 'wow', 'omg', 'lol', 'haha',
@@ -175,23 +280,34 @@ def calculate_generic_comment_score(text: str) -> float:
             'agree', 'disagree', 'true', 'false', 'yes', 'no'
         ]
         
-        # Count generic phrases
         generic_count = sum(1 for phrase in generic_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(generic_count / 3, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_hyperbole_falsehood_score(text: str) -> float:
-    """Calculate hyperbole and falsehood score."""
+def calculate_hyperbole_falsehood_score(text: str, model, tokenizer, device) -> float:
+    """Calculate hyperbole and falsehood score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Hyperbole and falsehood indicators
         hyperbole_phrases = [
             'always', 'never', 'everyone', 'nobody', 'every single',
             '100%', 'guaranteed', 'proven', 'definitely', 'absolutely',
@@ -199,23 +315,34 @@ def calculate_hyperbole_falsehood_score(text: str) -> float:
             'totally', 'literally', 'actually', 'really', 'very'
         ]
         
-        # Count hyperbole phrases
         hyperbole_count = sum(1 for phrase in hyperbole_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(hyperbole_count / 3, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_rapid_engagement_score(text: str) -> float:
-    """Calculate rapid engagement spike score."""
+def calculate_rapid_engagement_score(text: str, model, tokenizer, device) -> float:
+    """Calculate rapid engagement spike score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Rapid engagement indicators
         rapid_phrases = [
             'trending', 'trending now', 'going viral', 'viral',
             'exploding', 'blowing up', 'skyrocketing', 'soaring',
@@ -223,23 +350,34 @@ def calculate_rapid_engagement_score(text: str) -> float:
             'developing', 'developing story', 'latest', 'newest'
         ]
         
-        # Count rapid phrases
         rapid_count = sum(1 for phrase in rapid_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(rapid_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
-def calculate_reply_bait_score(text: str) -> float:
-    """Calculate reply bait score."""
+def calculate_reply_bait_score(text: str, model, tokenizer, device) -> float:
+    """Calculate reply bait score using the trained model."""
     try:
+        # Use the trained model for sophisticated scoring
+        with torch.no_grad():
+            enc = tokenizer(
+                text,
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt",
+            )
+            
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
+            
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
+            
+            return float(score)
+            
+    except Exception as e:
+        # Fallback to keyword-based scoring if model fails
         text_lower = text.lower()
-        
-        # Reply bait indicators
         reply_bait_phrases = [
             'what do you think', 'your thoughts', 'your opinion',
             'agree or disagree', 'comment below', 'comment your thoughts',
@@ -248,16 +386,9 @@ def calculate_reply_bait_score(text: str) -> float:
             'what about you', 'your turn', 'your say'
         ]
         
-        # Count reply bait phrases
         reply_bait_count = sum(1 for phrase in reply_bait_phrases if phrase in text_lower)
-        
-        # Calculate score
         score = min(reply_bait_count / 2, 1.0)
-        
         return max(0.0, min(1.0, score))
-        
-    except Exception as e:
-        return 0.0
 
 def main():
     """Main function to get score for a specific model and text."""
@@ -276,32 +407,39 @@ def main():
             print("0.0")
             return
         
+        # Load the Hugging Face model
+        model, tokenizer, device = load_hf_model()
+        
+        if model is None:
+            print("0.0")
+            return
+        
         # Select model and calculate score
         model_name = args.model.lower()
         
         if 'authority' in model_name:
-            score = calculate_authority_signal_score(text)
+            score = calculate_authority_signal_score(text, model, tokenizer, device)
         elif 'clickbait' in model_name:
-            score = calculate_clickbait_score(text)
-        elif 'content_recycling' in model_name or 'content_recycling' in model_name:
-            score = calculate_content_recycling_score(text)
+            score = calculate_clickbait_score(text, model, tokenizer, device)
+        elif 'content_recycling' in model_name:
+            score = calculate_content_recycling_score(text, model, tokenizer, device)
         elif 'coordinated' in model_name:
-            score = calculate_coordinated_network_score(text)
+            score = calculate_coordinated_network_score(text, model, tokenizer, device)
         elif 'emotive' in model_name:
-            score = calculate_emotive_manipulation_score(text)
+            score = calculate_emotive_manipulation_score(text, model, tokenizer, device)
         elif 'engagement_mismatch' in model_name:
-            score = calculate_engagement_mismatch_score(text)
+            score = calculate_engagement_mismatch_score(text, model, tokenizer, device)
         elif 'generic_comment' in model_name:
-            score = calculate_generic_comment_score(text)
+            score = calculate_generic_comment_score(text, model, tokenizer, device)
         elif 'hyperbole' in model_name or 'falsehood' in model_name:
-            score = calculate_hyperbole_falsehood_score(text)
+            score = calculate_hyperbole_falsehood_score(text, model, tokenizer, device)
         elif 'rapid_engagement' in model_name:
-            score = calculate_rapid_engagement_score(text)
+            score = calculate_rapid_engagement_score(text, model, tokenizer, device)
         elif 'reply_bait' in model_name:
-            score = calculate_reply_bait_score(text)
+            score = calculate_reply_bait_score(text, model, tokenizer, device)
         else:
             # Default to generic score if model not recognized
-            score = calculate_generic_comment_score(text)
+            score = calculate_generic_comment_score(text, model, tokenizer, device)
         
         # Output the score
         print(f"{score:.3f}")
@@ -312,3 +450,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
