@@ -137,8 +137,8 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
                         import torch
             
                         # Load from Hugging Face Hub (using your REAL model)
-                        hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                                    # Get token from environment or Streamlit secrets
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+            # Get token from environment or Streamlit secrets
             hf_token = os.getenv("HF_TOKEN") or st.secrets.get("hf_token", "")
             if hf_token:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
