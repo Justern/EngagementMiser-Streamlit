@@ -4,3 +4,5 @@ numpy>=1.21.0
 sqlalchemy>=1.4.0
 pyodbc>=4.0.0
 unixodbc
+torch>=2.0.0
+transformers>=4.30.0
