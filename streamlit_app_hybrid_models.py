@@ -930,8 +930,8 @@ def show_tweet_selection(engine):
             st.write(selected_tweet['tweet_text'])
             
             if st.button("🔍 Analyze This Tweet with HYBRID Models"):
-                        # Basic tweet metrics
-                        st.subheader("📊 Basic Tweet Metrics")
+                # Basic tweet metrics
+                st.subheader("📊 Basic Tweet Metrics")
                 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
