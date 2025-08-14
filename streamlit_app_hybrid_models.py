@@ -408,44 +408,44 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
             result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        st.warning("Tweet not found or JOIN failed, using simplified logic")
-                        # Fallback to simplified query if JOIN fails
-                        fallback_query = """
-                        SELECT text, author_id, followers_count
-                        FROM [dbo].[Tweets_Sample_4M]
-                        WHERE tweet_id = :tweet_id
-                        """
-                        fallback_result = conn.execute(text(fallback_query), {"tweet_id": str(tweet_id)}).fetchone()
+            st.warning("Tweet not found or JOIN failed, using simplified logic")
+            # Fallback to simplified query if JOIN fails
+            fallback_query = """
+            SELECT text, author_id, followers_count
+            FROM [dbo].[Tweets_Sample_4M]
+            WHERE tweet_id = :tweet_id
+            """
+            fallback_result = conn.execute(text(fallback_query), {"tweet_id": str(tweet_id)}).fetchone()
             
             if not fallback_result:
-                        return 0.0
+                return 0.0
             
-                        # Use simplified data
-                        tweet_data = {
-                        'text': str(fallback_result[0]),
-                        'author_id': str(fallback_result[1]),
-                        'followers_count': int(fallback_result[2]) if fallback_result[2] else 0,
-                        'following_count': 1000,  # Default
-                        'verified': False,  # Default
-                        'description': ''
-                        }
+            # Use simplified data
+            tweet_data = {
+                'text': str(fallback_result[0]),
+                'author_id': str(fallback_result[1]),
+                'followers_count': int(fallback_result[2]) if fallback_result[2] else 0,
+                'following_count': 1000,  # Default
+                'verified': False,  # Default
+                'description': ''
+            }
         else:
-                        # Use full data from JOIN
-                        tweet_data = {
-                        'text': str(result[0]),
-                        'author_id': str(result[1]),
-                        'like_count': int(result[2]) if result[2] else 0,
-                        'retweet_count': int(result[3]) if result[3] else 0,
-                        'reply_count': int(result[4]) if result[4] else 0,
-                        'quote_count': int(result[5]) if result[5] else 0,
-                        'followers_count': int(result[6]) if result[6] else 0,
-                        'following_count': int(result[7]) if result[7] else 0,
-                        'verified': bool(result[8]) if result[8] else False,
-                        'description': str(result[9]) if result[9] else ''
-                        }
+            # Use full data from JOIN
+            tweet_data = {
+                'text': str(result[0]),
+                'author_id': str(result[1]),
+                'like_count': int(result[2]) if result[2] else 0,
+                'retweet_count': int(result[3]) if result[3] else 0,
+                'reply_count': int(result[4]) if result[4] else 0,
+                'quote_count': int(result[5]) if result[5] else 0,
+                'followers_count': int(result[6]) if result[6] else 0,
+                'following_count': int(result[7]) if result[7] else 0,
+                'verified': bool(result[8]) if result[8] else False,
+                'description': str(result[9]) if result[9] else ''
+            }
         
-                # Use your ACTUAL authority signal logic
-                return calculate_simple_authority_score(tweet_data)
+        # Use your ACTUAL authority signal logic
+        return calculate_simple_authority_score(tweet_data)
         
     except Exception as e:
         st.warning(f"Authority Signal Manipulation failed: {e}")
@@ -454,49 +454,49 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
 def calculate_simple_authority_score(tweet_data: dict) -> float:
     """Calculate authority signal manipulation score using your REAL logic."""
     if not tweet_data:
-                return 0.0
+        return 0.0
     
-            try:
-                text = tweet_data['text'].lower()
-                followers = tweet_data['followers_count']
-                following = tweet_data['following_count']
-                verified = tweet_data['verified']
+    try:
+        text = tweet_data['text'].lower()
+        followers = tweet_data['followers_count']
+        following = tweet_data['following_count']
+        verified = tweet_data['verified']
         
-                # Your actual authority manipulation indicators
-                authority_phrases = [
+        # Your actual authority manipulation indicators
+        authority_phrases = [
             'expert', 'professional', 'doctor', 'scientist', 'researcher',
             'study shows', 'research proves', 'experts agree', 'authority',
             'scientifically proven', 'clinically tested', 'doctor recommended',
             'according to science', 'research indicates', 'studies confirm',
             'medical evidence', 'scientific evidence', 'clinical evidence',
             'expert opinion', 'professional opinion', 'authority figure'
-                ]
+        ]
         
-                # Count authority phrases (your logic)
-                authority_count = sum(1 for phrase in authority_phrases if phrase in text)
+        # Count authority phrases (your logic)
+        authority_count = sum(1 for phrase in authority_phrases if phrase in text)
         
-                # Profile mismatch indicators (your logic)
-                profile_mismatch = 0
+        # Profile mismatch indicators (your logic)
+        profile_mismatch = 0
         
-                # High authority language but low follower count
+        # High authority language but low follower count
         if authority_count > 0 and followers < 1000:
             profile_mismatch += 0.3
         
-                # High authority language but not verified
+        # High authority language but not verified
         if authority_count > 0 and not verified:
             profile_mismatch += 0.2
         
-                # Very high following to follower ratio (suspicious)
+        # Very high following to follower ratio (suspicious)
         if following > 0 and followers > 0:
             ratio = following / followers
             if ratio > 10:  # Following 10x more than followers
-            profile_mismatch += 0.2
+                profile_mismatch += 0.2
         
-                # Calculate score using your formula
-                authority_ratio = min(authority_count / 5, 1.0)  # Normalize to 0-1
-                final_score = (authority_ratio * 0.6) + (profile_mismatch * 0.4)
+        # Calculate score using your formula
+        authority_ratio = min(authority_count / 5, 1.0)  # Normalize to 0-1
+        final_score = (authority_ratio * 0.6) + (profile_mismatch * 0.4)
         
-                return max(0.0, min(1.0, final_score))
+        return max(0.0, min(1.0, final_score))
         
     except Exception as e:
         return 0.0
@@ -519,36 +519,36 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
             return 0.0
         
         tweet_text = result[0].lower()
-                followers_count = result[3] or 0
-                following_count = 1000  # Default value since we don't have this column
+        followers_count = result[3] or 0
+        following_count = 1000  # Default value since we don't have this column
         
-                # Bot/automation indicators
-                bot_indicators = [
-                        'bot', 'automated', 'auto', 'script', 'program', 'algorithm',
-                        'machine learning', 'ai', 'artificial intelligence', 'automation'
-                ]
+        # Bot/automation indicators
+        bot_indicators = [
+            'bot', 'automated', 'auto', 'script', 'program', 'algorithm',
+            'machine learning', 'ai', 'artificial intelligence', 'automation'
+        ]
         
-                # Check for bot language
-                bot_score = sum(1 for indicator in bot_indicators if indicator in tweet_text)
-                bot_score = min(bot_score / 2, 1.0)
+        # Check for bot language
+        bot_score = sum(1 for indicator in bot_indicators if indicator in tweet_text)
+        bot_score = min(bot_score / 2, 1.0)
         
-                # Network analysis (simplified)
+        # Network analysis (simplified)
         if following_count > 0:
-                        ratio = followers_count / following_count
-                        if ratio < 0.1:  # Following many, few followers
-                        network_score = 0.8
-                        elif ratio < 0.5:
-                        network_score = 0.6
-                        elif ratio < 1.0:
-                        network_score = 0.4
+            ratio = followers_count / following_count
+            if ratio < 0.1:  # Following many, few followers
+                network_score = 0.8
+            elif ratio < 0.5:
+                network_score = 0.6
+            elif ratio < 1.0:
+                network_score = 0.4
             else:
-                        network_score = 0.2
+                network_score = 0.2
         else:
-                        network_score = 0.5
+            network_score = 0.5
         
-                # Final score
-                final_score = (bot_score * 0.6) + (network_score * 0.4)
-                return min(final_score, 1.0)
+        # Final score
+        final_score = (bot_score * 0.6) + (network_score * 0.4)
+        return min(final_score, 1.0)
         
     except Exception as e:
         st.warning(f"Coordinated Account Network failed: {e}")
@@ -569,30 +569,30 @@ def calculate_emotive_manipulation_score(tweet_id, engine):
         
         tweet_text = result[0].lower()
         
-                # Emotional manipulation indicators
-                emotional_indicators = [
-                        'fear', 'anger', 'hate', 'love', 'joy', 'sadness', 'surprise',
-                        'disgust', 'anxiety', 'panic', 'excitement', 'euphoria', 'despair',
-                        'hope', 'faith', 'belief', 'trust', 'suspicion', 'paranoia'
-                ]
+        # Emotional manipulation indicators
+        emotional_indicators = [
+            'fear', 'anger', 'hate', 'love', 'joy', 'sadness', 'surprise',
+            'disgust', 'anxiety', 'panic', 'excitement', 'euphoria', 'despair',
+            'hope', 'faith', 'belief', 'trust', 'suspicion', 'paranoia'
+        ]
         
-                # Intense emotional words
-                intense_emotions = [
-                        'hate', 'love', 'fear', 'anger', 'joy', 'sadness', 'despair',
-                        'euphoria', 'panic', 'anxiety', 'excitement', 'terror', 'ecstasy'
-                ]
+        # Intense emotional words
+        intense_emotions = [
+            'hate', 'love', 'fear', 'anger', 'joy', 'sadness', 'despair',
+            'euphoria', 'panic', 'anxiety', 'excitement', 'terror', 'ecstasy'
+        ]
         
-                # Count emotional indicators
-                emotion_count = sum(1 for emotion in emotional_indicators if emotion in tweet_text)
-                intense_count = sum(1 for emotion in intense_emotions if emotion in tweet_text)
+        # Count emotional indicators
+        emotion_count = sum(1 for emotion in emotional_indicators if emotion in tweet_text)
+        intense_count = sum(1 for emotion in intense_emotions if emotion in tweet_text)
         
-                # Calculate scores
-                emotion_score = min(emotion_count / 5, 1.0)
-                intense_score = min(intense_count / 3, 1.0)
+        # Calculate scores
+        emotion_score = min(emotion_count / 5, 1.0)
+        intense_score = min(intense_count / 3, 1.0)
         
-                # Final score
-                final_score = (emotion_score * 0.6) + (intense_score * 0.4)
-                return min(final_score, 1.0)
+        # Final score
+        final_score = (emotion_score * 0.6) + (intense_score * 0.4)
+        return min(final_score, 1.0)
         
     except Exception as e:
         st.warning(f"Emotive Manipulation failed: {e}")
@@ -613,20 +613,20 @@ def calculate_generic_comment_score(tweet_id, engine):
         
         tweet_text = result[0].lower()
         
-                # Generic response indicators
-                generic_indicators = [
-                        'nice', 'good', 'great', 'awesome', 'cool', 'interesting',
-                        'thanks', 'thank you', 'appreciate it', 'good point',
-                        'i agree', 'you\'re right', 'exactly', 'true', 'correct',
-                        'same', 'me too', 'i feel you', 'relatable'
-                ]
+        # Generic response indicators
+        generic_indicators = [
+            'nice', 'good', 'great', 'awesome', 'cool', 'interesting',
+            'thanks', 'thank you', 'appreciate it', 'good point',
+            'i agree', 'you\'re right', 'exactly', 'true', 'correct',
+            'same', 'me too', 'i feel you', 'relatable'
+        ]
         
-                # Count generic indicators
-                generic_count = sum(1 for indicator in generic_indicators if indicator in tweet_text)
+        # Count generic indicators
+        generic_count = sum(1 for indicator in generic_indicators if indicator in tweet_text)
         
-                # Calculate score
-                final_score = min(generic_count / 3, 1.0)
-                return final_score
+        # Calculate score
+        final_score = min(generic_count / 3, 1.0)
+        return final_score
         
     except Exception as e:
         st.warning(f"Generic Comment failed: {e}")
@@ -653,23 +653,23 @@ def calculate_rapid_engagement_spike_score(tweet_id, engine):
         like_count = result[2] or 0
         reply_count = result[3] or 0
         
-                # Trending/viral indicators
-                trending_indicators = [
-                        'trending', 'viral', 'hot topic', 'breaking', 'news',
-                        'just in', 'update', 'developing', 'latest', 'recent'
-                ]
+        # Trending/viral indicators
+        trending_indicators = [
+            'trending', 'viral', 'hot topic', 'breaking', 'news',
+            'just in', 'update', 'developing', 'latest', 'recent'
+        ]
         
-                # Check for trending language
-                trending_score = sum(1 for indicator in trending_indicators if indicator in tweet_text)
-                trending_score = min(trending_score / 3, 1.0)
+        # Check for trending language
+        trending_score = sum(1 for indicator in trending_indicators if indicator in tweet_text)
+        trending_score = min(trending_score / 3, 1.0)
         
-                # Engagement analysis
-                total_engagement = retweet_count + like_count + reply_count
-                engagement_score = min(total_engagement / 1000, 1.0)
+        # Engagement analysis
+        total_engagement = retweet_count + like_count + reply_count
+        engagement_score = min(total_engagement / 1000, 1.0)
         
-                # Final score
-                final_score = (trending_score * 0.5) + (engagement_score * 0.5)
-                return min(final_score, 1.0)
+        # Final score
+        final_score = (trending_score * 0.5) + (engagement_score * 0.5)
+        return min(final_score, 1.0)
         
     except Exception as e:
         st.warning(f"Rapid Engagement Spike failed: {e}")
@@ -690,28 +690,28 @@ def calculate_reply_bait_score(tweet_id, engine):
         
         tweet_text = result[0].lower()
         
-                # Reply bait indicators
-                reply_bait_indicators = [
-                        'what do you think?', 'your thoughts?', 'agree or disagree?',
-                        'comment below', 'let me know', 'what\'s your opinion?',
-                        'who else', 'raise your hand if', 'drop a heart if',
-                        'tag someone who', 'who can relate?', 'am i the only one?'
-                ]
+        # Reply bait indicators
+        reply_bait_indicators = [
+            'what do you think?', 'your thoughts?', 'agree or disagree?',
+            'comment below', 'let me know', 'what\'s your opinion?',
+            'who else', 'raise your hand if', 'drop a heart if',
+            'tag someone who', 'who can relate?', 'am i the only one?'
+        ]
         
-                # Question indicators
-                question_indicators = ['?', 'what', 'how', 'why', 'when', 'where', 'who']
+        # Question indicators
+        question_indicators = ['?', 'what', 'how', 'why', 'when', 'where', 'who']
         
-                # Count indicators
-                bait_count = sum(1 for bait in reply_bait_indicators if bait in tweet_text)
-                question_count = sum(1 for question in question_indicators if question in tweet_text)
+        # Count indicators
+        bait_count = sum(1 for bait in reply_bait_indicators if bait in tweet_text)
+        question_count = sum(1 for question in question_indicators if question in tweet_text)
         
-                # Calculate scores
-                bait_score = min(bait_count / 2, 1.0)
-                question_score = min(question_count / 3, 1.0)
+        # Calculate scores
+        bait_score = min(bait_count / 2, 1.0)
+        question_score = min(question_count / 3, 1.0)
         
-                # Final score
-                final_score = (bait_score * 0.7) + (question_score * 0.3)
-                return min(final_score, 1.0)
+        # Final score
+        final_score = (bait_score * 0.7) + (question_score * 0.3)
+        return min(final_score, 1.0)
         
     except Exception as e:
         st.warning(f"Reply Bait failed: {e}")
@@ -793,13 +793,13 @@ def calculate_engagement_mismatch_fallback(tweet_text, retweet_count, like_count
     # Engagement ratio analysis
     total_engagement = retweet_count + like_count + reply_count
     if total_engagement > 0:
-                engagement_score = min(total_engagement / 500, 1.0)
+        engagement_score = min(total_engagement / 500, 1.0)
     else:
-                engagement_score = 0.0
+        engagement_score = 0.0
     
-            # Final score (higher bait score = higher suspicion)
-            final_score = (bait_score * 0.7) + (engagement_score * 0.3)
-            return min(final_score, 1.0)
+    # Final score (higher bait score = higher suspicion)
+    final_score = (bait_score * 0.7) + (engagement_score * 0.3)
+    return min(final_score, 1.0)
 
 def calculate_hyperbole_falsehood_fallback(tweet_text):
     """Fallback hyperbole/falsehood detection using rule-based logic."""
@@ -910,24 +910,24 @@ def show_tweet_selection(engine):
     tweets_df = fetch_tweets_sample(engine)
     
     if tweets_df.empty:
-                st.warning("No tweets available.")
-                return
+        st.warning("No tweets available.")
+        return
     
-            # Create selection interface
-            col1, col2 = st.columns([2, 1])
+    # Create selection interface
+    col1, col2 = st.columns([2, 1])
     
     with col1:
-                selected_tweet_id = st.selectbox(
-                        "Choose a tweet to analyze:",
-                        options=tweets_df['tweet_id'].tolist(),
-                        format_func=lambda x: f"Tweet {x} - {tweets_df[tweets_df['tweet_id'] == x]['tweet_text'].iloc[0][:100]}..."
-                )
+        selected_tweet_id = st.selectbox(
+            "Choose a tweet to analyze:",
+            options=tweets_df['tweet_id'].tolist(),
+            format_func=lambda x: f"Tweet {x} - {tweets_df[tweets_df['tweet_id'] == x]['tweet_text'].iloc[0][:100]}..."
+        )
     
     with col2:
         if selected_tweet_id:
-                        selected_tweet = tweets_df[tweets_df['tweet_id'] == selected_tweet_id].iloc[0]
-                        st.write("**Selected Tweet:**")
-                        st.write(selected_tweet['tweet_text'])
+            selected_tweet = tweets_df[tweets_df['tweet_id'] == selected_tweet_id].iloc[0]
+            st.write("**Selected Tweet:**")
+            st.write(selected_tweet['tweet_text'])
             
             if st.button("🔍 Analyze This Tweet with HYBRID Models"):
                         # Basic tweet metrics
@@ -1048,35 +1048,35 @@ def main():
     engine = get_azure_database_engine()
     
     if engine is None:
-                st.error("❌ Cannot proceed without database connection.")
-                return
+        st.error("❌ Cannot proceed without database connection.")
+        return
     
-            # Page routing
+    # Page routing
     if page == "🏠 Home":
-                st.subheader("Welcome to the HYBRID ECS System")
-                st.write("""
-                This is the **hybrid ECS system** that combines the best of both worlds:
+        st.subheader("Welcome to the HYBRID ECS System")
+        st.write("""
+        This is the **hybrid ECS system** that combines the best of both worlds:
         
-                **🔧 Hugging Face Models (4 models):**
-                - **Clickbait_Classifier** - Uses RoBERTa from Hugging Face Hub
-                - **Content_Recycling_Detector** - Uses RoBERTa from Hugging Face Hub  
-                - **Engagement_Mismatch_Detector** - Uses RoBERTa from Hugging Face Hub
-                - **Hyperbole_Falsehood_detector** - Uses RoBERTa from Hugging Face Hub
+        **🔧 Hugging Face Models (4 models):**
+        - **Clickbait_Classifier** - Uses RoBERTa from Hugging Face Hub
+        - **Content_Recycling_Detector** - Uses RoBERTa from Hugging Face Hub  
+        - **Engagement_Mismatch_Detector** - Uses RoBERTa from Hugging Face Hub
+        - **Hyperbole_Falsehood_detector** - Uses RoBERTa from Hugging Face Hub
         
-                **⚡ Rule-Based Models (6 models):**
-                - **Authority Signal Manipulation** - Expert phrase detection + profile analysis
-                - **Coordinated Account Network** - Bot/automation pattern analysis
-                - **Emotive Manipulation** - Emotional language detection
-                - **Generic Comment** - Basic response detection
-                - **Rapid Engagement Spike** - Trending/viral detection
-                - **Reply Bait** - Question/opinion baiting detection
+        **⚡ Rule-Based Models (6 models):**
+        - **Authority Signal Manipulation** - Expert phrase detection + profile analysis
+        - **Coordinated Account Network** - Bot/automation pattern analysis
+        - **Emotive Manipulation** - Emotional language detection
+        - **Generic Comment** - Basic response detection
+        - **Rapid Engagement Spike** - Trending/viral detection
+        - **Reply Bait** - Question/opinion baiting detection
         
-                **🚀 Benefits:**
-                - **Sophisticated ML** where needed (Hugging Face models)
-                - **Lightweight rules** for efficiency (rule-based models)
-                - **Automatic fallback** if Hugging Face models fail
-                - **Best performance** with minimal dependencies
-                """)
+        **🚀 Benefits:**
+        - **Sophisticated ML** where needed (Hugging Face models)
+        - **Lightweight rules** for efficiency (rule-based models)
+        - **Automatic fallback** if Hugging Face models fail
+        - **Best performance** with minimal dependencies
+        """)
         
                 # Show system status
                 st.subheader("🔄 System Status")
