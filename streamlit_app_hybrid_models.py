@@ -3,9 +3,6 @@
 Engagement Concordance Score - Hybrid Streamlit App
 ==================================================
 
-This app uses a hybrid approach:
-- 4 models use Hugging Face RoBERTa (torch/transformers)
-- 6 models use rule-based logic (lightweight)
 """
 
 import streamlit as st
@@ -877,19 +874,19 @@ def calculate_ecs_scores_hybrid(tweet_id, engine):
     
     # Define the 10 specialized models with their weights
     models = {
-        'Authority_Signal_Manipulation': 0.12,
-        'Clickbait_Headline_Classifier': 0.11,
-        'Content_Recycling_Detector': 0.10,
-        'Coordinated_Account_Network_Model': 0.10,
-        'Emotive_Manipulation_Detector': 0.11,
-        'Engagement_Mismatch_Detector': 0.10,
-        'Generic_Comment_Detector': 0.09,
-        'Hyperbole_Falsehood_detector': 0.10,
-        'Rapid_Engagement_Spike_Detector': 0.09,
-        'Reply_Bait_Detector': 0.08
+        'Authority_Signal_Manipulation': 0.7,
+        'Clickbait_Headline_Classifier': 0.8,
+        'Content_Recycling_Detector': 0.9,
+        'Coordinated_Account_Network_Model': 0.1,
+        'Emotive_Manipulation_Detector': 0.6,
+        'Engagement_Mismatch_Detector': 0.1,
+        'Generic_Comment_Detector': 0.6,
+        'Hyperbole_Falsehood_detector': 0.6,
+        'Rapid_Engagement_Spike_Detector': 0.5,
+        'Reply_Bait_Detector': 0.8
     }
     
-    st.info("🔍 Running HYBRID ECS models... Hugging Face + Rule-based logic")
+    st.info("🔍 Running HYBRID ECS models...")
     
     # Progress bar
     progress_bar = st.progress(0)
@@ -1025,14 +1022,14 @@ def show_tweet_selection(engine):
                 
                 # Color code based on score
                 if final_score >= 0.7:
-                    score_color = "🟢"
-                    risk_level = "LOW RISK"
+                    score_color = "🔴"
+                    risk_level = "HIGH RISK"
                 elif final_score >= 0.4:
                     score_color = "🟡"
                     risk_level = "MEDIUM RISK"
                 else:
-                    score_color = "🔴"
-                    risk_level = "HIGH RISK"
+                    score_color = "🟢"
+                    risk_level = "LOW RISK"
                     
                 col1, col2, col3 = st.columns(3)
                 with col1:
@@ -1065,7 +1062,7 @@ def show_tweet_selection(engine):
                 
                 **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
                 
-                **Note:** This uses HYBRID approach - Hugging Face models + Rule-based logic!
+                **Note:** This uses HYBRID approach
                 """)
 
 def main():
