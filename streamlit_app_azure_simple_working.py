@@ -239,106 +239,106 @@ def show_tweet_selection(engine):
             st.write("**Selected Tweet:**")
             st.write(selected_tweet['tweet_text'])
             
-                         if st.button("🔍 Analyze This Tweet"):
-                 # Basic tweet metrics
-                 st.subheader("📊 Basic Tweet Metrics")
-                 
-                 col1, col2, col3, col4 = st.columns(4)
-                 with col1:
-                     st.metric("Likes", selected_tweet['like_count'])
-                 with col2:
-                     st.metric("Retweets", selected_tweet['retweet_count'])
-                 with col3:
-                     st.metric("Replies", selected_tweet['reply_count'])
-                 with col4:
-                     st.metric("Followers", selected_tweet['follower_count'])
-                 
-                 # Show additional info
-                 st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
-                 st.write(f"**Created:** {selected_tweet['created_at']}")
-                 st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
-                 
-                 # Simple engagement score
-                 engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
-                 st.metric("Engagement Rate", f"{engagement:.3f}")
-                 
-                 # Run ECS Models
-                 st.subheader("🔍 ECS Model Analysis")
-                 
-                 # Run all ECS models
-                 scores, final_score, weights = calculate_ecs_scores(selected_tweet['tweet_text'])
-                 
-                 # Display individual model scores
-                 st.subheader("📊 Individual Model Scores")
-                 
-                 # Create columns for scores
-                 col1, col2 = st.columns(2)
-                 
-                 with col1:
-                     for i, (model_name, score) in enumerate(scores.items()):
-                         if i < 5:  # First 5 models
-                             weight = weights[model_name]
-                             st.metric(
-                                 f"{model_name} (Weight: {weight:.2f})", 
-                                 f"{score:.3f}",
-                                 help=f"Score: {score:.3f}, Weight: {weight:.2f}"
-                             )
-                 
-                 with col2:
-                     for i, (model_name, score) in enumerate(scores.items()):
-                         if i >= 5:  # Last 5 models
-                             weight = weights[model_name]
-                             st.metric(
-                                 f"{model_name} (Weight: {weight:.2f})", 
-                                 f"{score:.3f}",
-                                 help=f"Score: {score:.3f}, Weight: {weight:.2f}"
-                             )
-                 
-                 # Display final weighted score
-                 st.subheader("🏆 Final ECS Score")
-                 
-                 # Color code based on score
-                 if final_score >= 0.7:
-                     score_color = "🟢"
-                     risk_level = "LOW RISK"
-                 elif final_score >= 0.4:
-                     score_color = "🟡"
-                     risk_level = "MEDIUM RISK"
-                 else:
-                     score_color = "🔴"
-                     risk_level = "HIGH RISK"
-                 
-                 col1, col2, col3 = st.columns(3)
-                 with col1:
-                     st.metric("Final ECS Score", f"{final_score:.3f}")
-                 with col2:
-                     st.metric("Risk Level", risk_level)
-                 with col3:
-                     st.metric("Confidence", f"{score_color}")
-                 
-                 # Show calculation breakdown
-                 st.subheader("🧮 Score Calculation Breakdown")
-                 
-                 # Create a DataFrame for better visualization
-                 score_df = pd.DataFrame([
-                     {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
-                     for name, score in scores.items()
-                 ])
-                 
-                 st.dataframe(score_df, use_container_width=True)
-                 
-                 # Calculate totals for display
-                 total_weighted = sum(score * weights[name] for name, score in scores.items())
-                 total_weight = sum(weights.values())
-                 
-                 # Show formula
-                 st.info(f"""
-                 **Final Score Formula:**
-                 
-                 Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
-                 
-                 **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
-                 """)
+            if st.button("🔍 Analyze This Tweet"):
+                # Basic tweet metrics
+                st.subheader("📊 Basic Tweet Metrics")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Likes", selected_tweet['like_count'])
+                with col2:
+                    st.metric("Retweets", selected_tweet['retweet_count'])
+                with col3:
+                    st.metric("Replies", selected_tweet['reply_count'])
+                with col4:
+                    st.metric("Followers", selected_tweet['follower_count'])
+                
+                # Show additional info
+                st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
+                st.write(f"**Created:** {selected_tweet['created_at']}")
+                st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
+                
+                # Simple engagement score
+                engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
+                st.metric("Engagement Rate", f"{engagement:.3f}")
+                
+                # Run ECS Models
+                st.subheader("🔍 ECS Model Analysis")
+                
+                # Run all ECS models
+                scores, final_score, weights = calculate_ecs_scores(selected_tweet['tweet_text'])
+                
+                # Display individual model scores
+                st.subheader("📊 Individual Model Scores")
+                
+                # Create columns for scores
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    for i, (model_name, score) in enumerate(scores.items()):
+                        if i < 5:  # First 5 models
+                            weight = weights[model_name]
+                            st.metric(
+                                f"{model_name} (Weight: {weight:.2f})", 
+                                f"{score:.3f}",
+                                help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+                            )
+                
+                with col2:
+                    for i, (model_name, score) in enumerate(scores.items()):
+                        if i >= 5:  # Last 5 models
+                            weight = weights[model_name]
+                            st.metric(
+                                f"{model_name} (Weight: {weight:.2f})", 
+                                f"{score:.3f}",
+                                help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+                            )
+                
+                # Display final weighted score
+                st.subheader("🏆 Final ECS Score")
+                
+                # Color code based on score
+                if final_score >= 0.7:
+                    score_color = "🟢"
+                    risk_level = "LOW RISK"
+                elif final_score >= 0.4:
+                    score_color = "🟡"
+                    risk_level = "MEDIUM RISK"
+                else:
+                    score_color = "🔴"
+                    risk_level = "HIGH RISK"
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Final ECS Score", f"{final_score:.3f}")
+                with col2:
+                    st.metric("Risk Level", risk_level)
+                with col3:
+                    st.metric("Confidence", f"{score_color}")
+                
+                # Show calculation breakdown
+                st.subheader("🧮 Score Calculation Breakdown")
+                
+                # Create a DataFrame for better visualization
+                score_df = pd.DataFrame([
+                    {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
+                    for name, score in scores.items()
+                ])
+                
+                st.dataframe(score_df, use_container_width=True)
+                
+                # Calculate totals for display
+                total_weighted = sum(score * weights[name] for name, score in scores.items())
+                total_weight = sum(weights.values())
+                
+                # Show formula
+                st.info(f"""
+                **Final Score Formula:**
+                
+                Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
+                
+                **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
+                """)
 
 def show_popular_entities_analysis(engine):
     """Show popular entities analysis."""
