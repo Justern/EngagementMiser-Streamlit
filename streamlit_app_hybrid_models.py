@@ -1078,23 +1078,23 @@ def main():
         - **Best performance** with minimal dependencies
         """)
         
-                # Show system status
-                st.subheader("🔄 System Status")
-                col1, col2, col3 = st.columns(3)
+        # Show system status
+        st.subheader("🔄 System Status")
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-                        st.success("✅ Database Connected")
+            st.success("✅ Database Connected")
         with col2:
-                        st.info("🤖 Hugging Face Models")
+            st.info("🤖 Hugging Face Models")
         with col3:
-                        st.info("⚡ Rule-Based Models")
+            st.info("⚡ Rule-Based Models")
     
-            elif page == "🐦 Tweet Analysis":
-                show_tweet_selection(engine)
+    elif page == "🐦 Tweet Analysis":
+        show_tweet_selection(engine)
     
-            # Footer
-            st.markdown("---")
-            st.markdown("**ECS System v4.0** | Hybrid Models | Hugging Face + Rule-Based | Azure SQL Database")
+    # Footer
+    st.markdown("---")
+    st.markdown("**ECS System v4.0** | Hybrid Models | Hugging Face + Rule-Based | Azure SQL Database")
 
 if __name__ == "__main__":
-            main()
+    main()
