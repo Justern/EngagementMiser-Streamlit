@@ -141,12 +141,12 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
             # Get token from environment or Streamlit secrets
             hf_token = os.getenv("HF_TOKEN") or st.secrets.get("hf_token", "")
             if hf_token:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
-                # Fallback to public access if no token
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Fallback to public access if no token
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -155,21 +155,21 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
             
             # Tokenize and predict
             with torch.no_grad():
-                enc = tokenizer(
-                    tweet_text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=128,
-                    return_tensors="pt",
-                )
+            enc = tokenizer(
+            tweet_text,
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+            return_tensors="pt",
+            )
                 
-                input_ids = enc["input_ids"].to(device)
-                attention_mask = enc["attention_mask"].to(device)
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
                 
-                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                score = torch.sigmoid(logits.squeeze()).item()
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
                 
-                return float(score)
+            return float(score)
                 
         except Exception as e:
             st.warning(f"Clickbait Hugging Face model failed: {e}, using fallback")
@@ -208,13 +208,13 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
             
             # Load from Hugging Face Hub (using your REAL model)
             hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            hf_token = get_hf_token()
             if hf_token:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -223,21 +223,21 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
             
             # Tokenize and predict
             with torch.no_grad():
-                enc = tokenizer(
-                    tweet_text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=128,
-                    return_tensors="pt",
-                )
+            enc = tokenizer(
+            tweet_text,
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+            return_tensors="pt",
+            )
                 
-                input_ids = enc["input_ids"].to(device)
-                attention_mask = enc["attention_mask"].to(device)
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
                 
-                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                score = torch.sigmoid(logits.squeeze()).item()
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
                 
-                return float(score)
+            return float(score)
                 
         except Exception as e:
             st.warning(f"Content Recycling Hugging Face model failed: {e}, using fallback")
@@ -276,13 +276,13 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
             
             # Load from Hugging Face Hub (using your REAL model)
             hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            hf_token = get_hf_token()
             if hf_token:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -291,21 +291,21 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
             
             # Tokenize and predict
             with torch.no_grad():
-                enc = tokenizer(
-                    tweet_text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=128,
-                    return_tensors="pt",
-                )
+            enc = tokenizer(
+            tweet_text,
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+            return_tensors="pt",
+            )
                 
-                input_ids = enc["input_ids"].to(device)
-                attention_mask = enc["attention_mask"].to(device)
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
                 
-                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                score = torch.sigmoid(logits.squeeze()).item()
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
                 
-                return float(score)
+            return float(score)
                 
         except Exception as e:
             st.warning(f"Engagement Mismatch Hugging Face model failed: {e}, using fallback")
@@ -338,13 +338,13 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
             
             # Load from Hugging Face Hub (using your REAL model)
             hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            hf_token = get_hf_token()
             if hf_token:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
-                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -353,21 +353,21 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
             
             # Tokenize and predict
             with torch.no_grad():
-                enc = tokenizer(
-                    tweet_text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=128,
-                    return_tensors="pt",
-                )
+            enc = tokenizer(
+            tweet_text,
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+            return_tensors="pt",
+            )
                 
-                input_ids = enc["input_ids"].to(device)
-                attention_mask = enc["attention_mask"].to(device)
+            input_ids = enc["input_ids"].to(device)
+            attention_mask = enc["attention_mask"].to(device)
                 
-                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                score = torch.sigmoid(logits.squeeze()).item()
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            score = torch.sigmoid(logits.squeeze()).item()
                 
-                return float(score)
+            return float(score)
                 
         except Exception as e:
             st.warning(f"Hyperbole/Falsehood Hugging Face model failed: {e}, using fallback")
@@ -388,16 +388,16 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
         # Get tweet data from Azure using your actual query structure
         query = """
             SELECT TOP 1 
-                t.text,
-                t.author_id,
-                t.like_count,
-                t.retweet_count,
-                t.reply_count,
-                t.quote_count,
-                u.followers_count,
-                u.following_count,
-                u.verified,
-                u.description
+            t.text,
+            t.author_id,
+            t.like_count,
+            t.retweet_count,
+            t.reply_count,
+            t.quote_count,
+            u.followers_count,
+            u.following_count,
+            u.verified,
+            u.description
             FROM [dbo].[Tweets_Sample_4M] t
             JOIN [dbo].[TwitterUsers] u ON t.author_id = u.id
             WHERE CAST(t.tweet_id AS VARCHAR(32)) = :tweet_id
@@ -411,37 +411,37 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
             st.warning("Tweet not found or JOIN failed, using simplified logic")
             # Fallback to simplified query if JOIN fails
             fallback_query = """
-                SELECT text, author_id, followers_count
-                FROM [dbo].[Tweets_Sample_4M]
-                WHERE tweet_id = :tweet_id
+            SELECT text, author_id, followers_count
+            FROM [dbo].[Tweets_Sample_4M]
+            WHERE tweet_id = :tweet_id
             """
             fallback_result = conn.execute(text(fallback_query), {"tweet_id": str(tweet_id)}).fetchone()
             
             if not fallback_result:
-                return 0.0
+            return 0.0
             
             # Use simplified data
             tweet_data = {
-                'text': str(fallback_result[0]),
-                'author_id': str(fallback_result[1]),
-                'followers_count': int(fallback_result[2]) if fallback_result[2] else 0,
-                'following_count': 1000,  # Default
-                'verified': False,  # Default
-                'description': ''
+            'text': str(fallback_result[0]),
+            'author_id': str(fallback_result[1]),
+            'followers_count': int(fallback_result[2]) if fallback_result[2] else 0,
+            'following_count': 1000,  # Default
+            'verified': False,  # Default
+            'description': ''
             }
         else:
             # Use full data from JOIN
             tweet_data = {
-                'text': str(result[0]),
-                'author_id': str(result[1]),
-                'like_count': int(result[2]) if result[2] else 0,
-                'retweet_count': int(result[3]) if result[3] else 0,
-                'reply_count': int(result[4]) if result[4] else 0,
-                'quote_count': int(result[5]) if result[5] else 0,
-                'followers_count': int(result[6]) if result[6] else 0,
-                'following_count': int(result[7]) if result[7] else 0,
-                'verified': bool(result[8]) if result[8] else False,
-                'description': str(result[9]) if result[9] else ''
+            'text': str(result[0]),
+            'author_id': str(result[1]),
+            'like_count': int(result[2]) if result[2] else 0,
+            'retweet_count': int(result[3]) if result[3] else 0,
+            'reply_count': int(result[4]) if result[4] else 0,
+            'quote_count': int(result[5]) if result[5] else 0,
+            'followers_count': int(result[6]) if result[6] else 0,
+            'following_count': int(result[7]) if result[7] else 0,
+            'verified': bool(result[8]) if result[8] else False,
+            'description': str(result[9]) if result[9] else ''
             }
         
         # Use your ACTUAL authority signal logic
@@ -490,7 +490,7 @@ def calculate_simple_authority_score(tweet_data: dict) -> float:
         if following > 0 and followers > 0:
             ratio = following / followers
             if ratio > 10:  # Following 10x more than followers
-                profile_mismatch += 0.2
+            profile_mismatch += 0.2
         
         # Calculate score using your formula
         authority_ratio = min(authority_count / 5, 1.0)  # Normalize to 0-1
@@ -536,13 +536,13 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
         if following_count > 0:
             ratio = followers_count / following_count
             if ratio < 0.1:  # Following many, few followers
-                network_score = 0.8
+            network_score = 0.8
             elif ratio < 0.5:
-                network_score = 0.6
+            network_score = 0.6
             elif ratio < 1.0:
-                network_score = 0.4
+            network_score = 0.4
             else:
-                network_score = 0.2
+            network_score = 0.2
         else:
             network_score = 0.5
         
@@ -930,107 +930,107 @@ def show_tweet_selection(engine):
             st.write(selected_tweet['tweet_text'])
             
             if st.button("🔍 Analyze This Tweet with HYBRID Models"):
-                # Basic tweet metrics
-                st.subheader("📊 Basic Tweet Metrics")
+            # Basic tweet metrics
+            st.subheader("📊 Basic Tweet Metrics")
                 
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Likes", selected_tweet['like_count'])
-                with col2:
-                    st.metric("Retweets", selected_tweet['retweet_count'])
-                with col3:
-                    st.metric("Replies", selected_tweet['reply_count'])
-                with col4:
-                    st.metric("Followers", selected_tweet['follower_count'])
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+            st.metric("Likes", selected_tweet['like_count'])
+            with col2:
+            st.metric("Retweets", selected_tweet['retweet_count'])
+            with col3:
+            st.metric("Replies", selected_tweet['reply_count'])
+            with col4:
+            st.metric("Followers", selected_tweet['follower_count'])
                 
-                # Show additional info
-                st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
-                st.write(f"**Created:** {selected_tweet['created_at']}")
-                st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
+            # Show additional info
+            st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
+            st.write(f"**Created:** {selected_tweet['created_at']}")
+            st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
                 
-                # Simple engagement score
-                engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
-                st.metric("Engagement Rate", f"{engagement:.3f}")
+            # Simple engagement score
+            engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
+            st.metric("Engagement Rate", f"{engagement:.3f}")
                 
-                # Run HYBRID ECS Models
-                st.subheader("🔍 HYBRID ECS Model Analysis")
+            # Run HYBRID ECS Models
+            st.subheader("🔍 HYBRID ECS Model Analysis")
                 
-                # Run all ECS models with hybrid approach
-                scores, final_score, weights = calculate_ecs_scores_hybrid(selected_tweet['tweet_id'], engine)
+            # Run all ECS models with hybrid approach
+            scores, final_score, weights = calculate_ecs_scores_hybrid(selected_tweet['tweet_id'], engine)
                 
-                # Display individual model scores
-                st.subheader("📊 Individual Model Scores (Hybrid Approach)")
+            # Display individual model scores
+            st.subheader("📊 Individual Model Scores (Hybrid Approach)")
                 
-                # Create columns for scores
-                col1, col2 = st.columns(2)
+            # Create columns for scores
+            col1, col2 = st.columns(2)
                 
-                with col1:
-                    for i, (model_name, score) in enumerate(scores.items()):
-                        if i < 5:  # First 5 models
-                            weight = weights[model_name]
-                            st.metric(
-                                f"{model_name} (Weight: {weight:.2f})", 
-                                f"{score:.3f}",
-                                help=f"Score: {score:.3f}, Weight: {weight:.2f}"
-                            )
+            with col1:
+            for i, (model_name, score) in enumerate(scores.items()):
+            if i < 5:  # First 5 models
+            weight = weights[model_name]
+            st.metric(
+            f"{model_name} (Weight: {weight:.2f})",
+            f"{score:.3f}",
+            help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+            )
                 
-                with col2:
-                    for i, (model_name, score) in enumerate(scores.items()):
-                        if i >= 5:  # Last 5 models
-                            weight = weights[model_name]
-                            st.metric(
-                                f"{model_name} (Weight: {weight:.2f})", 
-                                f"{score:.3f}",
-                                help=f"Score: {score:.3f}, Weight: {weight:.2f}"
-                            )
+            with col2:
+            for i, (model_name, score) in enumerate(scores.items()):
+            if i >= 5:  # Last 5 models
+            weight = weights[model_name]
+            st.metric(
+            f"{model_name} (Weight: {weight:.2f})",
+            f"{score:.3f}",
+            help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+            )
                 
-                # Display final weighted score
-                st.subheader("🏆 Final ECS Score (Hybrid Models)")
+            # Display final weighted score
+            st.subheader("🏆 Final ECS Score (Hybrid Models)")
                 
-                # Color code based on score
-                if final_score >= 0.7:
-                    score_color = "🟢"
-                    risk_level = "LOW RISK"
-                elif final_score >= 0.4:
-                    score_color = "🟡"
-                    risk_level = "MEDIUM RISK"
-                else:
-                    score_color = "🔴"
-                    risk_level = "HIGH RISK"
+            # Color code based on score
+            if final_score >= 0.7:
+            score_color = "🟢"
+            risk_level = "LOW RISK"
+            elif final_score >= 0.4:
+            score_color = "🟡"
+            risk_level = "MEDIUM RISK"
+            else:
+            score_color = "🔴"
+            risk_level = "HIGH RISK"
                 
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Final ECS Score", f"{final_score:.3f}")
-                with col2:
-                    st.metric("Risk Level", risk_level)
-                with col3:
-                    st.metric("Confidence", f"{score_color}")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+            st.metric("Final ECS Score", f"{final_score:.3f}")
+            with col2:
+            st.metric("Risk Level", risk_level)
+            with col3:
+            st.metric("Confidence", f"{score_color}")
                 
-                # Show calculation breakdown
-                st.subheader("🧮 Score Calculation Breakdown (Hybrid Models)")
+            # Show calculation breakdown
+            st.subheader("🧮 Score Calculation Breakdown (Hybrid Models)")
                 
-                # Create a DataFrame for better visualization
-                score_df = pd.DataFrame([
-                    {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
-                    for name, score in scores.items()
-                ])
+            # Create a DataFrame for better visualization
+            score_df = pd.DataFrame([
+            {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
+            for name, score in scores.items()
+            ])
                 
-                st.dataframe(score_df, use_container_width=True)
+            st.dataframe(score_df, use_container_width=True)
                 
-                # Calculate totals for display
-                total_weighted = sum(score * weights[name] for name, score in scores.items())
-                total_weight = sum(weights.values())
+            # Calculate totals for display
+            total_weighted = sum(score * weights[name] for name, score in scores.items())
+            total_weight = sum(weights.values())
                 
-                # Show formula
-                st.info(f"""
-                **Final Score Formula:**
+            # Show formula
+            st.info(f"""
+            **Final Score Formula:**
                 
-                Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
+            Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
                 
-                **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
+            **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
                 
-                **Note:** This uses HYBRID approach - Hugging Face models + Rule-based logic!
-                """)
+            **Note:** This uses HYBRID approach - Hugging Face models + Rule-based logic!
+            """)
 
 def main():
     """Main application function."""
