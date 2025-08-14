@@ -1073,6 +1073,21 @@ def main():
     st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
     st.markdown("### Hybrid Model System - Hugging Face + Rule-Based Logic")
     
+    # Development version redirect button
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("### 🚀 **Development Version Available**")
+        if st.button("🔗 Access Full Development Version", type="primary", use_container_width=True):
+            st.markdown("""
+            **Redirecting to development version with full model access...**
+            
+            [Click here to access: https://engagementmiser.ngrok.app](https://engagementmiser.ngrok.app)
+            """)
+            st.info("💡 **Note:** The development version has access to all local model files and checkpoints.")
+    
+    st.markdown("---")
+    
     # Sidebar navigation
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
