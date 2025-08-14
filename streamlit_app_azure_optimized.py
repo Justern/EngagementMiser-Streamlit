@@ -83,7 +83,7 @@ def get_database_engine():
         password = st.secrets.get("azure_db.password", "")
         
         # Azure SQL Database connection string
-        conn_str = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=yes"
+        conn_str = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
         
         # Create SQLAlchemy engine
         from sqlalchemy import create_engine
