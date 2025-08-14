@@ -107,16 +107,16 @@ def fetch_tweets_sample(_engine, sample_size=2000):
         query = f"""
         SELECT TOP {sample_size} 
             tweet_id,
-            tweet_text,
+            text as tweet_text,
             created_at,
-            user_id,
+            author_id as user_id,
             retweet_count,
             like_count,
             reply_count,
             quote_count,
-            follower_count,
-            verified,
-            account_age_days
+            followers_count as follower_count,
+            followers_count,  -- Use this instead of verified
+            DATEDIFF(day, created_at, GETDATE()) as account_age_days
         FROM [dbo].[Tweets_Sample_4M]
         ORDER BY NEWID()
         """
@@ -159,15 +159,20 @@ def show_tweet_selection(engine):
                 # Simple analysis without complex models
                 st.subheader("📊 Tweet Analysis")
                 
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Likes", selected_tweet['like_count'])
-                with col2:
-                    st.metric("Retweets", selected_tweet['retweet_count'])
-                with col3:
-                    st.metric("Replies", selected_tweet['reply_count'])
-                with col4:
-                    st.metric("Followers", selected_tweet['follower_count'])
+                                 col1, col2, col3, col4 = st.columns(4)
+                 with col1:
+                     st.metric("Likes", selected_tweet['like_count'])
+                 with col2:
+                     st.metric("Retweets", selected_tweet['retweet_count'])
+                 with col3:
+                     st.metric("Replies", selected_tweet['reply_count'])
+                 with col4:
+                     st.metric("Followers", selected_tweet['follower_count'])
+                 
+                 # Show additional info
+                 st.write(f"**Tweet Text:** {selected_tweet['tweet_text']}")
+                 st.write(f"**Created:** {selected_tweet['created_at']}")
+                 st.write(f"**Account Age:** {selected_tweet['account_age_days']} days")
                 
                 # Simple engagement score
                 engagement = (selected_tweet['like_count'] + selected_tweet['retweet_count'] + selected_tweet['reply_count']) / max(selected_tweet['follower_count'], 1)
