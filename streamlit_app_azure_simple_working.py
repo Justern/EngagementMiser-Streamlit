@@ -381,7 +381,7 @@ def show_popular_entities_analysis(engine):
 def main():
     """Main application function."""
     st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
-             st.markdown("### Azure Connected - Full ECS Model Analysis")
+    st.markdown("### Azure Connected - Full ECS Model Analysis")
     
     # Sidebar navigation
     st.sidebar.title("Navigation")
@@ -400,16 +400,16 @@ def main():
     # Page routing
     if page == "🏠 Home":
         st.subheader("Welcome to the ECS System")
-                 st.write("""
-         This is the **full ECS system** that connects to Azure SQL Database and runs all 10 specialized models.
-         
-         **Features:**
-         - 🐦 **Tweet Analysis**: View and analyze individual tweets with full ECS scoring
-         - 📊 **Popular Entities**: View trending entities and risk levels
-         - 🔍 **10 Specialized Models**: Authority, Clickbait, Content Recycling, Coordinated Networks, Emotive Manipulation, Engagement Mismatch, Generic Comments, Hyperbole/Falsehood, Rapid Engagement, Reply Bait
-         
-         **Note:** This version includes complete ECS model analysis with weighted scoring.
-         """)
+        st.write("""
+        This is the **full ECS system** that connects to Azure SQL Database and runs all 10 specialized models.
+        
+        **Features:**
+        - 🐦 **Tweet Analysis**: View and analyze individual tweets with full ECS scoring
+        - 📊 **Popular Entities**: View trending entities and risk levels
+        - 🔍 **10 Specialized Models**: Authority, Clickbait, Content Recycling, Coordinated Networks, Emotive Manipulation, Engagement Mismatch, Generic Comments, Hyperbole/Falsehood, Rapid Engagement, Reply Bait
+        
+        **Note:** This version includes complete ECS model analysis with weighted scoring.
+        """)
         
         # Show system status
         st.subheader("🔄 System Status")
@@ -419,8 +419,8 @@ def main():
             st.success("✅ Database Connected")
         with col2:
             st.info("📊 Data Available")
-                 with col3:
-             st.info("🔧 Full ECS Mode")
+        with col3:
+            st.info("🔧 Full ECS Mode")
     
     elif page == "🐦 Tweet Analysis":
         show_tweet_selection(engine)
@@ -430,7 +430,7 @@ def main():
     
     # Footer
     st.markdown("---")
-         st.markdown("**ECS System v1.0** | Azure SQL Database | Full ECS Model Analysis")
+    st.markdown("**ECS System v1.0** | Azure SQL Database | Full ECS Model Analysis")
 
 if __name__ == "__main__":
     main()
