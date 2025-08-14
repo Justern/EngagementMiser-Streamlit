@@ -116,12 +116,11 @@ def fetch_tweets_sample(_engine, sample_size=2000):
 def calculate_authority_signal_manipulation_score(tweet_id, engine):
     """Calculate Authority Signal Manipulation score using specialized logic."""
     try:
-        # Get tweet and user data from Azure
+        # Get tweet data from Azure (simplified to avoid JOIN issues)
         query = """
-        SELECT t.text, t.author_id, u.followers_count, u.verified, u.account_age_days
-        FROM [dbo].[Tweets_Sample_4M] t
-        JOIN [dbo].[TwitterUsers] u ON t.author_id = u.user_id
-        WHERE t.tweet_id = :tweet_id
+        SELECT text, author_id, followers_count, created_at
+        FROM [dbo].[Tweets_Sample_4M]
+        WHERE tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
@@ -133,8 +132,8 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
         
         tweet_text = result[0].lower()
         followers_count = result[2] or 0
-        verified = result[3] or False
-        account_age_days = result[4] or 0
+        verified = False  # Default value since we don't have this column
+        account_age_days = 365  # Default value since we don't have this column
         
         # Authority phrases detection
         authority_phrases = [
@@ -257,12 +256,11 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
 def calculate_coordinated_account_network_score(tweet_id, engine):
     """Calculate Coordinated Account Network score using specialized logic."""
     try:
-        # Get tweet and user data from Azure
+        # Get tweet data from Azure (simplified to avoid JOIN issues)
         query = """
-        SELECT t.text, t.author_id, t.created_at, u.followers_count, u.following_count
-        FROM [dbo].[Tweets_Sample_4M] t
-        JOIN [dbo].[TwitterUsers] u ON t.author_id = u.user_id
-        WHERE t.tweet_id = ?
+        SELECT text, author_id, created_at, followers_count
+        FROM [dbo].[Tweets_Sample_4M]
+        WHERE tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
@@ -274,7 +272,7 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
         
         tweet_text = result[0].lower()
         followers_count = result[3] or 0
-        following_count = result[4] or 0
+        following_count = 1000  # Default value since we don't have this column
         
         # Bot/automation indicators
         bot_indicators = [
