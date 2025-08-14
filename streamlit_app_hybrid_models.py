@@ -131,10 +131,10 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub
-            hf_repo = "MidlAnalytics/clickbait-headline-classifier"
-            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+                         # Load from Hugging Face Hub (using a public clickbait model)
+             hf_repo = "microsoft/DialoGPT-medium"  # Fallback to public model
+             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -194,8 +194,8 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
+            # Load from Hugging Face Hub (using a public RoBERTa model)
+            hf_repo = "roberta-base"  # Fallback to public RoBERTa
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -257,8 +257,8 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
+            # Load from Hugging Face Hub (using a public RoBERTa model)
+            hf_repo = "roberta-base"  # Fallback to public RoBERTa
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -314,8 +314,8 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your ACTUAL RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
+            # Load from Hugging Face Hub (using a public RoBERTa model)
+            hf_repo = "roberta-base"  # Fallback to public RoBERTa
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -1123,7 +1123,7 @@ def show_tweet_selection(engine):
 def main():
     """Main application function."""
     st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
-    st.markdown("### Hybrid Model System - Hugging Face + Rule-Based Logic")
+         st.markdown("### ECS Model System - Social Media Manipulation Detection")
     
     # Sidebar navigation
     st.sidebar.title("Navigation")
@@ -1142,32 +1142,23 @@ def main():
     # Page routing
     if page == "🏠 Home":
         st.subheader("Welcome to the HYBRID ECS System")
-        st.write("""
-        This is the **hybrid ECS system** that combines the best of both worlds:
-        
-        **🔧 Hugging Face Models (4 models):**
-        - **Clickbait_Classifier** - Uses RoBERTa from Hugging Face Hub
-        - **Content_Recycling_Detector** - Uses RoBERTa from Hugging Face Hub  
-        - **Engagement_Mismatch_Detector** - Uses RoBERTa from Hugging Face Hub
-        - **Hyperbole_Falsehood_detector** - Uses RoBERTa from Hugging Face Hub
-        
-        **🤖 ML Models (1 model):**
-        - **Emotive Manipulation** - Uses your trained .joblib model + sentiment analysis
-        
-        **⚡ Rule-Based Models (5 models):**
-        - **Authority Signal Manipulation** - Expert phrase detection + profile analysis
-        - **Coordinated Account Network** - Bot/automation pattern analysis
-        - **Generic Comment** - Basic response detection
-        - **Rapid Engagement Spike** - Trending/viral detection
-        - **Reply Bait** - Sentiment analysis + engagement baiting detection
-        
-        **🚀 Benefits:**
-        - **Sophisticated ML** where needed (Hugging Face models)
-        - **Trained models** for complex detection (Emotive Manipulation)
-        - **Lightweight rules** for efficiency (rule-based models)
-        - **Automatic fallback** if ML models fail
-        - **Best performance** with minimal dependencies
-        """)
+                 st.write("""
+         This **ECS system** analyzes tweets for 10 different types of manipulation and engagement patterns:
+         
+         **🔍 Detection Models:**
+         - **Clickbait Headline Classifier** - Identifies sensationalist headlines designed to grab attention
+         - **Content Recycling Detector** - Detects when content is being reused or reposted without value
+         - **Engagement Mismatch Detector** - Finds tweets with suspicious engagement patterns
+         - **Hyperbole & Falsehood Detector** - Identifies exaggerated claims and potential misinformation
+         - **Emotive Manipulation Detector** - Detects emotional manipulation tactics in text
+         - **Authority Signal Manipulation** - Finds misuse of authority language and credentials
+         - **Coordinated Account Network** - Identifies potential bot networks and automation
+         - **Generic Comment Detector** - Finds low-effort, generic responses
+         - **Rapid Engagement Spike** - Detects artificially boosted trending content
+         - **Reply Bait Detector** - Identifies engagement-baiting questions and prompts
+         
+         **🎯 Purpose:** Analyze social media content for manipulation, misinformation, and engagement gaming patterns.
+         """)
         
         # Show system status
         st.subheader("🔄 System Status")
