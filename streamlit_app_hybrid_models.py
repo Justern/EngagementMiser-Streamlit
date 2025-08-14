@@ -131,8 +131,8 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using a public clickbait model)
-            hf_repo = "microsoft/DialoGPT-medium"  # Fallback to public model
+            # Load from Hugging Face Hub
+            hf_repo = "MidlAnalytics/clickbait-headline-classifier"
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -194,8 +194,8 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using a public RoBERTa model)
-            hf_repo = "roberta-base"  # Fallback to public RoBERTa
+            # Load from Hugging Face Hub (using your RoBERTa model)
+            hf_repo = "MidlAnalytics/text-softlabel-roberta"
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -257,8 +257,8 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using a public RoBERTa model)
-            hf_repo = "roberta-base"  # Fallback to public RoBERTa
+            # Load from Hugging Face Hub (using your RoBERTa model)
+            hf_repo = "MidlAnalytics/text-softlabel-roberta"
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -295,7 +295,7 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
         return 0.0
 
 def calculate_hyperbole_falsehood_score(tweet_id, engine):
-    """Calculate Hyperbole/Falsehood score using your REAL RoBERTa model from Hugging Face."""
+    """Calculate Hyperbole/Falsehood score using Hugging Face RoBERTa."""
     try:
         # Get tweet text from Azure
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
@@ -309,13 +309,13 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
         
         tweet_text = result[0]
         
-        # Try to use your ACTUAL Hugging Face RoBERTa model
+        # Try to use Hugging Face model
         try:
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using a public RoBERTa model)
-            hf_repo = "roberta-base"  # Fallback to public RoBERTa
+            # Load from Hugging Face Hub (using your RoBERTa model)
+            hf_repo = "MidlAnalytics/text-softlabel-roberta"
             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
@@ -324,7 +324,7 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
             model = model.to(device)
             model.eval()
             
-            # Tokenize and predict using your model's logic
+            # Tokenize and predict
             with torch.no_grad():
                 enc = tokenizer(
                     tweet_text,
@@ -337,7 +337,6 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
                 input_ids = enc["input_ids"].to(device)
                 attention_mask = enc["attention_mask"].to(device)
                 
-                # Use your model's prediction logic
                 logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
                 score = torch.sigmoid(logits.squeeze()).item()
                 
@@ -529,7 +528,7 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
         return 0.0
 
 def calculate_emotive_manipulation_score(tweet_id, engine):
-    """Calculate Emotive Manipulation score using your REAL trained model and logic."""
+    """Calculate Emotive Manipulation score using rule-based logic."""
     try:
         # Get tweet text from Azure
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
@@ -541,109 +540,35 @@ def calculate_emotive_manipulation_score(tweet_id, engine):
         if not result:
             return 0.0
         
-        tweet_text = result[0]
+        tweet_text = result[0].lower()
         
-        # Try to use your ACTUAL trained .joblib model first
-        try:
-            import joblib
-            import os
-            
-            # Path to your trained model
-            model_path = "Emotive_Manipulation_Detector/emotive_manipulation_model.joblib"
-            
-            if os.path.exists(model_path):
-                # Load your trained model
-                model_data = joblib.load(model_path)
-                
-                # Extract components
-                model = model_data['model']
-                vectorizer = model_data['vectorizer']
-                feature_names = model_data['feature_names']
-                is_trained = model_data['is_trained']
-                
-                if is_trained:
-                    # Use your ML model for prediction
-                    # Vectorize the text
-                    text_features = vectorizer.transform([tweet_text])
-                    
-                    # Get prediction
-                    prediction = model.predict(text_features)[0]
-                    
-                    # Normalize to 0-1 range
-                    score = max(0.0, min(1.0, float(prediction)))
-                    
-                    st.success("✅ Emotive Manipulation: Using your TRAINED ML model!")
-                    return score
-                else:
-                    st.warning("⚠️  Emotive Manipulation: Model not trained, using rule-based logic")
-                    return calculate_emotive_manipulation_fallback(tweet_text)
-            else:
-                st.warning("⚠️  Emotive Manipulation: .joblib model not found, using rule-based logic")
-                return calculate_emotive_manipulation_fallback(tweet_text)
-                
-        except Exception as e:
-            st.warning(f"Emotive Manipulation ML model failed: {e}, using fallback")
-            # Fallback to your rule-based logic
-            return calculate_emotive_manipulation_fallback(tweet_text)
-            
+        # Emotional manipulation indicators
+        emotional_indicators = [
+            'fear', 'anger', 'hate', 'love', 'joy', 'sadness', 'surprise',
+            'disgust', 'anxiety', 'panic', 'excitement', 'euphoria', 'despair',
+            'hope', 'faith', 'belief', 'trust', 'suspicion', 'paranoia'
+        ]
+        
+        # Intense emotional words
+        intense_emotions = [
+            'hate', 'love', 'fear', 'anger', 'joy', 'sadness', 'despair',
+            'euphoria', 'panic', 'anxiety', 'excitement', 'terror', 'ecstasy'
+        ]
+        
+        # Count emotional indicators
+        emotion_count = sum(1 for emotion in emotional_indicators if emotion in tweet_text)
+        intense_count = sum(1 for emotion in intense_emotions if emotion in tweet_text)
+        
+        # Calculate scores
+        emotion_score = min(emotion_count / 5, 1.0)
+        intense_score = min(intense_count / 3, 1.0)
+        
+        # Final score
+        final_score = (emotion_score * 0.6) + (intense_score * 0.4)
+        return min(final_score, 1.0)
+        
     except Exception as e:
         st.warning(f"Emotive Manipulation failed: {e}")
-        return 0.0
-
-def calculate_emotive_manipulation_fallback(tweet_text):
-    """Fallback emotive manipulation detection using your REAL logic from simple_score.py."""
-    if not tweet_text:
-        return 0.0
-    
-    try:
-        text_lower = tweet_text.lower()
-        
-        # Your ACTUAL emotional manipulation patterns from simple_score.py
-        emotional_patterns = {
-            'urgency': [
-                'urgent', 'immediate', 'now', 'hurry', 'quick', 'fast', 'limited time',
-                'deadline', 'expires', 'last chance', 'don\'t miss out', 'act fast',
-                'right now', 'this instant', 'asap', 'rush', 'hurry up', 'don\'t wait'
-            ],
-            'scarcity': [
-                'limited', 'exclusive', 'rare', 'unique', 'one of a kind', 'only',
-                'last one', 'while supplies last', 'limited edition', 'rare opportunity',
-                'final chance', 'last opportunity', 'never again', 'once in a lifetime'
-            ],
-            'fear': [
-                'scared', 'afraid', 'terrified', 'panic', 'danger', 'threat', 'risk',
-                'warning', 'caution', 'beware', 'scary', 'frightening', 'horrifying',
-                'terrifying', 'shocking', 'alarming', 'disturbing'
-            ],
-            'guilt': [
-                'should', 'must', 'have to', 'need to', 'responsible', 'duty',
-                'obligation', 'owe it to', 'let down', 'disappoint', 'fail',
-                'you\'re wrong if', 'you\'ll regret', 'you\'re missing out'
-            ],
-            'flattery': [
-                'amazing', 'incredible', 'brilliant', 'genius', 'expert', 'master',
-                'professional', 'special', 'elite', 'premium', 'vip', 'exclusive',
-                'outstanding', 'extraordinary', 'phenomenal', 'revolutionary'
-            ]
-        }
-        
-        # Count pattern matches using your logic
-        total_patterns = 0
-        for pattern_type, patterns in emotional_patterns.items():
-            count = sum(1 for pattern in patterns if pattern in text_lower)
-            total_patterns += count
-        
-        # Calculate score based on pattern density (your formula)
-        text_length = len(tweet_text.split())
-        if text_length == 0:
-            return 0.0
-        
-        pattern_density = total_patterns / text_length
-        score = min(1.0, pattern_density * 10)  # Your scale factor
-        
-        return score
-        
-    except Exception as e:
         return 0.0
 
 def calculate_generic_comment_score(tweet_id, engine):
@@ -724,22 +649,10 @@ def calculate_rapid_engagement_spike_score(tweet_id, engine):
         return 0.0
 
 def calculate_reply_bait_score(tweet_id, engine):
-    """Calculate Reply Bait score using your REAL logic with sentiment analysis."""
+    """Calculate Reply Bait score using rule-based logic."""
     try:
-        # Get tweet data from Azure using your actual query structure
-        query = """
-        SELECT TOP 1 
-            t.text,
-            t.author_id,
-            t.in_reply_to_user_id,
-            t.conversation_id,
-            t.like_count,
-            t.retweet_count,
-            t.reply_count,
-            t.quote_count
-        FROM [dbo].[Tweets_Sample_4M] t
-        WHERE CAST(t.tweet_id AS VARCHAR(32)) = :tweet_id
-        """
+        # Get tweet text from Azure
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
@@ -748,61 +661,33 @@ def calculate_reply_bait_score(tweet_id, engine):
         if not result:
             return 0.0
         
-        # Use your ACTUAL data structure from simple_score.py
-        tweet_data = {
-            'text': str(result[0]),
-            'author_id': str(result[1]),
-            'in_reply_to_user_id': str(result[2]) if result[2] else None,
-            'conversation_id': str(result[3]) if result[3] else None,
-            'like_count': int(result[4]) if result[4] else 0,
-            'retweet_count': int(result[5]) if result[5] else 0,
-            'reply_count': int(result[6]) if result[6] else 0,
-            'quote_count': int(result[7]) if result[7] else 0
-        }
+        tweet_text = result[0].lower()
         
-        # Use your REAL reply-bait logic from simple_score.py
-        return calculate_simple_reply_bait_score(tweet_data)
+        # Reply bait indicators
+        reply_bait_indicators = [
+            'what do you think?', 'your thoughts?', 'agree or disagree?',
+            'comment below', 'let me know', 'what\'s your opinion?',
+            'who else', 'raise your hand if', 'drop a heart if',
+            'tag someone who', 'who can relate?', 'am i the only one?'
+        ]
+        
+        # Question indicators
+        question_indicators = ['?', 'what', 'how', 'why', 'when', 'where', 'who']
+        
+        # Count indicators
+        bait_count = sum(1 for bait in reply_bait_indicators if bait in tweet_text)
+        question_count = sum(1 for question in question_indicators if question in tweet_text)
+        
+        # Calculate scores
+        bait_score = min(bait_count / 2, 1.0)
+        question_score = min(question_count / 3, 1.0)
+        
+        # Final score
+        final_score = (bait_score * 0.7) + (question_score * 0.3)
+        return min(final_score, 1.0)
         
     except Exception as e:
         st.warning(f"Reply Bait failed: {e}")
-        return 0.0
-
-def calculate_simple_reply_bait_score(tweet_data: dict) -> float:
-    """Calculate reply-bait score using your REAL logic from simple_score.py."""
-    if not tweet_data:
-        return 0.0
-    
-    try:
-        text = tweet_data['text'].lower()
-        is_reply = tweet_data['in_reply_to_user_id'] is not None
-        reply_count = tweet_data['reply_count']
-        
-        # Your ACTUAL reply-bait phrases from simple_score.py
-        reply_bait_phrases = [
-            'what do you think?', 'thoughts?', 'agree?', 'disagree?',
-            'your opinion?', 'what\'s your take?', 'how about you?',
-            'anyone else?', 'am i right?', 'am i wrong?', 'thoughts?',
-            'agree or disagree?', 'what say you?', 'your thoughts?',
-            'anyone?', 'thoughts on this?', 'what do you think?',
-            'agree?', 'disagree?', 'thoughts?', 'anyone else?'
-        ]
-        
-        # Count reply-bait phrases using your logic
-        reply_bait_count = sum(1 for phrase in reply_bait_phrases if phrase in text)
-        
-        # Question marks (indicate seeking engagement) - your logic
-        question_marks = text.count('?')
-        
-        # Calculate score using your formula
-        phrase_score = min(reply_bait_count / 3, 1.0)  # Your normalization
-        question_score = min(question_marks / 5, 1.0)  # Your normalization
-        
-        # Combine scores using your weights
-        final_score = (phrase_score * 0.6) + (question_score * 0.4)
-        
-        return max(0.0, min(1.0, final_score))
-        
-    except Exception as e:
         return 0.0
 
 # ============================================================================
@@ -1123,7 +1008,7 @@ def show_tweet_selection(engine):
 def main():
     """Main application function."""
     st.markdown('<h1 class="main-header">🔍 Engagement Concordance Score</h1>', unsafe_allow_html=True)
-    st.markdown("### ECS Model System - Social Media Manipulation Detection")
+    st.markdown("### Hybrid Model System - Hugging Face + Rule-Based Logic")
     
     # Sidebar navigation
     st.sidebar.title("Navigation")
@@ -1143,22 +1028,28 @@ def main():
     if page == "🏠 Home":
         st.subheader("Welcome to the HYBRID ECS System")
         st.write("""
-        This **ECS system** analyzes tweets for 10 different types of manipulation and engagement patterns:
-         
-         **🔍 Detection Models:**
-         - **Clickbait Headline Classifier** - Identifies sensationalist headlines designed to grab attention
-         - **Content Recycling Detector** - Detects when content is being reused or reposted without value
-         - **Engagement Mismatch Detector** - Finds tweets with suspicious engagement patterns
-         - **Hyperbole & Falsehood Detector** - Identifies exaggerated claims and potential misinformation
-         - **Emotive Manipulation Detector** - Detects emotional manipulation tactics in text
-         - **Authority Signal Manipulation** - Finds misuse of authority language and credentials
-         - **Coordinated Account Network** - Identifies potential bot networks and automation
-         - **Generic Comment Detector** - Finds low-effort, generic responses
-         - **Rapid Engagement Spike** - Detects artificially boosted trending content
-         - **Reply Bait Detector** - Identifies engagement-baiting questions and prompts
-         
-         **🎯 Purpose:** Analyze social media content for manipulation, misinformation, and engagement gaming patterns.
-         """)
+        This is the **hybrid ECS system** that combines the best of both worlds:
+        
+        **🔧 Hugging Face Models (4 models):**
+        - **Clickbait_Classifier** - Uses RoBERTa from Hugging Face Hub
+        - **Content_Recycling_Detector** - Uses RoBERTa from Hugging Face Hub  
+        - **Engagement_Mismatch_Detector** - Uses RoBERTa from Hugging Face Hub
+        - **Hyperbole_Falsehood_detector** - Uses RoBERTa from Hugging Face Hub
+        
+        **⚡ Rule-Based Models (6 models):**
+        - **Authority Signal Manipulation** - Expert phrase detection + profile analysis
+        - **Coordinated Account Network** - Bot/automation pattern analysis
+        - **Emotive Manipulation** - Emotional language detection
+        - **Generic Comment** - Basic response detection
+        - **Rapid Engagement Spike** - Trending/viral detection
+        - **Reply Bait** - Question/opinion baiting detection
+        
+        **🚀 Benefits:**
+        - **Sophisticated ML** where needed (Hugging Face models)
+        - **Lightweight rules** for efficiency (rule-based models)
+        - **Automatic fallback** if Hugging Face models fail
+        - **Best performance** with minimal dependencies
+        """)
         
         # Show system status
         st.subheader("🔄 System Status")
