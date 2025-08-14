@@ -1,0 +1,8 @@
+# System packages for PyTorch and ODBC
+build-essential
+libopenblas-dev
+liblapack-dev
+libjpeg-dev
+libpng-dev
+unixodbc
+unixodbc-dev
