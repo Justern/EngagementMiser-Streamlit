@@ -965,72 +965,72 @@ def show_tweet_selection(engine):
                         col1, col2 = st.columns(2)
                 
             with col1:
-                        for i, (model_name, score) in enumerate(scores.items()):
-                        if i < 5:  # First 5 models
+                for i, (model_name, score) in enumerate(scores.items()):
+                    if i < 5:  # First 5 models
                         weight = weights[model_name]
                         st.metric(
-                        f"{model_name} (Weight: {weight:.2f})",
-                        f"{score:.3f}",
-                        help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+                            f"{model_name} (Weight: {weight:.2f})",
+                            f"{score:.3f}",
+                            help=f"Score: {score:.3f}, Weight: {weight:.2f}"
                         )
                 
             with col2:
-                        for i, (model_name, score) in enumerate(scores.items()):
-                        if i >= 5:  # Last 5 models
+                for i, (model_name, score) in enumerate(scores.items()):
+                    if i >= 5:  # Last 5 models
                         weight = weights[model_name]
                         st.metric(
-                        f"{model_name} (Weight: {weight:.2f})",
-                        f"{score:.3f}",
-                        help=f"Score: {score:.3f}, Weight: {weight:.2f}"
+                            f"{model_name} (Weight: {weight:.2f})",
+                            f"{score:.3f}",
+                            help=f"Score: {score:.3f}, Weight: {weight:.2f}"
                         )
                 
-                        # Display final weighted score
-                        st.subheader("🏆 Final ECS Score (Hybrid Models)")
-                
-                        # Color code based on score
+            # Display final weighted score
+            st.subheader("🏆 Final ECS Score (Hybrid Models)")
+            
+            # Color code based on score
             if final_score >= 0.7:
-                        score_color = "🟢"
-                        risk_level = "LOW RISK"
-                        elif final_score >= 0.4:
-                        score_color = "🟡"
-                        risk_level = "MEDIUM RISK"
+                score_color = "🟢"
+                risk_level = "LOW RISK"
+            elif final_score >= 0.4:
+                score_color = "🟡"
+                risk_level = "MEDIUM RISK"
             else:
-                        score_color = "🔴"
-                        risk_level = "HIGH RISK"
+                score_color = "🔴"
+                risk_level = "HIGH RISK"
                 
-                        col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3)
             with col1:
-                        st.metric("Final ECS Score", f"{final_score:.3f}")
+                st.metric("Final ECS Score", f"{final_score:.3f}")
             with col2:
-                        st.metric("Risk Level", risk_level)
+                st.metric("Risk Level", risk_level)
             with col3:
-                        st.metric("Confidence", f"{score_color}")
+                st.metric("Confidence", f"{score_color}")
                 
-                        # Show calculation breakdown
-                        st.subheader("🧮 Score Calculation Breakdown (Hybrid Models)")
-                
-                        # Create a DataFrame for better visualization
-                        score_df = pd.DataFrame([
-                        {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
-                        for name, score in scores.items()
-                        ])
-                
-                        st.dataframe(score_df, use_container_width=True)
-                
-                        # Calculate totals for display
-                        total_weighted = sum(score * weights[name] for name, score in scores.items())
-                        total_weight = sum(weights.values())
-                
-                        # Show formula
-                        st.info(f"""
-                        **Final Score Formula:**
-                
-                        Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
-                
-                        **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
-                
-                        **Note:** This uses HYBRID approach - Hugging Face models + Rule-based logic!
-                        """)
+            # Show calculation breakdown
+            st.subheader("🧮 Score Calculation Breakdown (Hybrid Models)")
+            
+            # Create a DataFrame for better visualization
+            score_df = pd.DataFrame([
+                {'Model': name, 'Score': score, 'Weight': weights[name], 'Weighted Score': score * weights[name]}
+                for name, score in scores.items()
+            ])
+            
+            st.dataframe(score_df, use_container_width=True)
+            
+            # Calculate totals for display
+            total_weighted = sum(score * weights[name] for name, score in scores.items())
+            total_weight = sum(weights.values())
+            
+            # Show formula
+            st.info(f"""
+            **Final Score Formula:**
+            
+            Final ECS Score = Σ(Model Score × Weight) / Σ(Weights)
+            
+            **Your Result:** {final_score:.3f} = {total_weighted:.3f} / {total_weight:.2f}
+            
+            **Note:** This uses HYBRID approach - Hugging Face models + Rule-based logic!
+            """)
 
 def main():
     """Main application function."""
