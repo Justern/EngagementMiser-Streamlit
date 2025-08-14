@@ -42,6 +42,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Hugging Face authentication helper
+def get_hf_token():
+    """Get Hugging Face token from environment or Streamlit secrets."""
+    return os.getenv("HF_TOKEN") or st.secrets.get("hf_token", "")
+
 # Database connection function
 @st.cache_resource
 def get_azure_database_engine():
@@ -131,10 +136,17 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub
-            hf_repo = "MidlAnalytics/clickbait-headline-classifier"
-            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+            # Get token from environment or Streamlit secrets
+            hf_token = os.getenv("HF_TOKEN") or st.secrets.get("hf_token", "")
+            if hf_token:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            else:
+                # Fallback to public access if no token
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -194,10 +206,15 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
-            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+                        hf_token = get_hf_token()
+            if hf_token:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            else:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -257,10 +274,15 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
-            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+                        hf_token = get_hf_token()
+            if hf_token:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            else:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -314,10 +336,15 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-            # Load from Hugging Face Hub (using your RoBERTa model)
-            hf_repo = "MidlAnalytics/text-softlabel-roberta"
-            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+                        hf_token = get_hf_token()
+            if hf_token:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+            else:
+                tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
