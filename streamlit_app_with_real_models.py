@@ -112,17 +112,23 @@ def fetch_tweets_sample(_engine, sample_size=2000):
 def run_real_model(tweet_id, model_folder):
     """Run the actual specialized model from its folder."""
     try:
-        # Get the path to the model's simple_score.py
-        model_path = os.path.join(model_folder, "simple_score.py")
+        # Get the absolute path to the model's simple_score.py
+        current_dir = os.getcwd()
+        model_path = os.path.join(current_dir, model_folder, "simple_score.py")
+        
+        # Debug: Show the paths being used
+        st.info(f"🔍 Debug: Current dir: {current_dir}")
+        st.info(f"🔍 Debug: Model folder: {model_folder}")
+        st.info(f"🔍 Debug: Full model path: {model_path}")
         
         if not os.path.exists(model_path):
             st.warning(f"Model script not found: {model_path}")
             return 0.0
         
-        # Run the model script with the tweet ID
+        # Run the model script with the tweet ID from the model folder
         result = subprocess.run([
-            'python', model_path, str(tweet_id)
-        ], capture_output=True, text=True, timeout=30, cwd=model_folder)
+            'python', 'simple_score.py', str(tweet_id)
+        ], capture_output=True, text=True, timeout=30, cwd=os.path.join(current_dir, model_folder))
         
         if result.returncode == 0:
             try:
