@@ -126,7 +126,7 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
         
         tweet_text = result[0]
         
-                    # Try to use Hugging Face model
+        # Try to use Hugging Face model
         try:
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
@@ -1142,8 +1142,8 @@ def main():
     # Page routing
     if page == "🏠 Home":
         st.subheader("Welcome to the HYBRID ECS System")
-                 st.write("""
-         This **ECS system** analyzes tweets for 10 different types of manipulation and engagement patterns:
+        st.write("""
+        This **ECS system** analyzes tweets for 10 different types of manipulation and engagement patterns:
          
          **🔍 Detection Models:**
          - **Clickbait Headline Classifier** - Identifies sensationalist headlines designed to grab attention
