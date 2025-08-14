@@ -1,0 +1,24 @@
+# Requirements for Hybrid ECS Streamlit App
+# Combines Hugging Face models (torch/transformers) + Rule-based models
+
+# Core Streamlit
+streamlit>=1.28.0
+
+# Database
+pyodbc>=4.0.39
+sqlalchemy>=2.0.0
+
+# Data manipulation
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Hugging Face models (for 4 models that need RoBERTa)
+torch>=2.0.0
+transformers>=4.30.0
+tokenizers>=0.13.0
+
+# Visualization
+plotly>=5.15.0
+
+# Other utilities
+python-dateutil>=2.8.0
