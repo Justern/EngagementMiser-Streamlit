@@ -126,15 +126,15 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
         
         tweet_text = result[0]
         
-        # Try to use Hugging Face model
+                    # Try to use Hugging Face model
         try:
             from transformers import AutoTokenizer, AutoModelForSequenceClassification
             import torch
             
-                         # Load from Hugging Face Hub (using a public clickbait model)
-             hf_repo = "microsoft/DialoGPT-medium"  # Fallback to public model
-             tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-             model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+            # Load from Hugging Face Hub (using a public clickbait model)
+            hf_repo = "microsoft/DialoGPT-medium"  # Fallback to public model
+            tokenizer = AutoTokenizer.from_pretrained(hf_repo)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
             # Set device
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
