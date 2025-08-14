@@ -196,14 +196,17 @@ class AzureModelAdapter:
             SELECT 
                 tweet_id,
                 tweet_text,
-                author_id,
+                user_id as author_id,
                 created_at,
                 retweet_count,
                 like_count,
-                followers_count,
-                total_engagements,
-                engagement_rate
-            FROM tweets 
+                follower_count as followers_count,
+                (retweet_count + like_count + reply_count + quote_count) as total_engagements,
+                CASE 
+                    WHEN follower_count > 0 THEN (retweet_count + like_count + reply_count + quote_count) / CAST(follower_count AS FLOAT)
+                    ELSE 0 
+                END as engagement_rate
+            FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
             WHERE tweet_id = {tweet_id}
             """
             
@@ -227,11 +230,11 @@ class AzureModelAdapter:
         try:
             query = f"""
             SELECT TOP 1
-                author_id as user_id,
-                followers_count,
-                total_engagements
-            FROM tweets 
-            WHERE author_id = '{author_id}'
+                user_id as author_id,
+                follower_count as followers_count,
+                (retweet_count + like_count + reply_count + quote_count) as total_engagements
+            FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
+            WHERE user_id = '{author_id}'
             ORDER BY created_at DESC
             """
             
@@ -256,14 +259,14 @@ class AzureModelAdapter:
             query = f"""
             SELECT TOP 100
                 tweet_id,
-                author_id as user_id,
+                user_id as author_id,
                 created_at,
                 retweet_count,
                 like_count,
                 reply_count,
                 quote_count
-            FROM tweets 
-            WHERE author_id = '{author_id}'
+            FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
+            WHERE user_id = '{author_id}'
             ORDER BY created_at DESC
             """
             
@@ -282,8 +285,8 @@ class DeploymentModels:
     
     def __init__(self):
         print("🚀 Initializing DeploymentModels...")
-        self.adapter = LocalModelAdapter()
-        print("✅ LocalModelAdapter initialized")
+        self.adapter = AzureModelAdapter()
+        print("✅ AzureModelAdapter initialized")
         
         print("🔄 Loading RoBERTa model...")
         self.tokenizer, self.model = load_roberta_model()

@@ -78,7 +78,7 @@ def get_database_engine():
     try:
         # Database connection parameters from secrets (Azure)
         server = st.secrets.get("azure_db.server", "ecs-sql-server-engagementmiser.database.windows.net")
-        database = st.secrets.get("azure_db.database", "EngagementMiser")
+        database = st.secrets.get("azure_db.database", "ecs_tweets_db")
         username = st.secrets.get("azure_db.username", "ecsadmin")
         password = st.secrets.get("azure_db.password", "")
         
@@ -118,7 +118,7 @@ def fetch_popular_entities(_engine, limit=4000):
             frequency,
             engagement_score,
             risk_level
-        FROM [EngagementMiser].[dbo].[Popular_Entities_Optimized]
+        FROM [EngagementMiser].[dbo].[Popular_Entities_Corpus]
         ORDER BY frequency DESC, engagement_score DESC
         """
         
@@ -147,7 +147,7 @@ def fetch_tweets_sample(_engine, sample_size=2000):
             follower_count,
             verified,
             account_age_days
-        FROM [EngagementMiser].[dbo].[Tweets_Optimized]
+        FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
         ORDER BY NEWID()  -- Random selection
         """
         
@@ -176,7 +176,7 @@ def fetch_tweet_by_id(_engine, tweet_id):
             follower_count,
             verified,
             account_age_days
-        FROM [EngagementMiser].[dbo].[Tweets_Optimized]
+        FROM [EngagementMiser].[dbo].[Tweets_Sample_4M]
         WHERE tweet_id = :tweet_id
         """
         
