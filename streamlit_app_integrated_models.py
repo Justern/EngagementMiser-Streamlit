@@ -121,12 +121,12 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
         SELECT t.text, t.author_id, u.followers_count, u.verified, u.account_age_days
         FROM [dbo].[Tweets_Sample_4M] t
         JOIN [dbo].[TwitterUsers] u ON t.author_id = u.user_id
-        WHERE t.tweet_id = ?
+        WHERE t.tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -168,11 +168,11 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
     """Calculate Clickbait Headline Classifier score using specialized logic."""
     try:
         # Get tweet text from Azure
-        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?"
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -213,12 +213,12 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
         # Get tweet data from Azure
         query = """
         SELECT text, retweet_count, like_count, reply_count, created_at
-        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?
+        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -267,7 +267,7 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -312,11 +312,11 @@ def calculate_emotive_manipulation_score(tweet_id, engine):
     """Calculate Emotive Manipulation score using specialized logic."""
     try:
         # Get tweet text from Azure
-        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?"
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -358,12 +358,12 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
         # Get tweet data from Azure
         query = """
         SELECT text, retweet_count, like_count, reply_count, author_id
-        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?
+        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -403,11 +403,11 @@ def calculate_generic_comment_score(tweet_id, engine):
     """Calculate Generic Comment score using specialized logic."""
     try:
         # Get tweet text from Azure
-        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?"
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -437,11 +437,11 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
     """Calculate Hyperbole/Falsehood score using specialized logic."""
     try:
         # Get tweet text from Azure
-        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?"
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -485,12 +485,12 @@ def calculate_rapid_engagement_spike_score(tweet_id, engine):
         # Get tweet data from Azure
         query = """
         SELECT text, retweet_count, like_count, reply_count, created_at
-        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?
+        FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id
         """
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
@@ -526,11 +526,11 @@ def calculate_reply_bait_score(tweet_id, engine):
     """Calculate Reply Bait score using specialized logic."""
     try:
         # Get tweet text from Azure
-        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = ?"
+        query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
             from sqlalchemy import text
-            result = conn.execute(text(query), [str(tweet_id)]).fetchone()
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
             return 0.0
