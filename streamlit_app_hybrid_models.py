@@ -123,20 +123,20 @@ def calculate_clickbait_headline_classifier_score(tweet_id, engine):
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0]
+        tweet_text = result[0]
         
-                # Try to use Hugging Face model
-                try:
-                        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-                        import torch
+        # Try to use Hugging Face model
+        try:
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            import torch
             
-                        # Load from Hugging Face Hub (using your REAL model)
+            # Load from Hugging Face Hub (using your REAL model)
             hf_repo = "MidlAnalytics/engagement-concordance-roberta"
             # Get token from environment or Streamlit secrets
             hf_token = os.getenv("HF_TOKEN") or st.secrets.get("hf_token", "")
@@ -190,54 +190,54 @@ def calculate_content_recycling_detector_score(tweet_id, engine):
         """
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0]
-                retweet_count = result[1] or 0
-                like_count = result[2] or 0
-                reply_count = result[3] or 0
+        tweet_text = result[0]
+        retweet_count = result[1] or 0
+        like_count = result[2] or 0
+        reply_count = result[3] or 0
         
-                # Try to use Hugging Face model
-                try:
-                        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-                        import torch
+        # Try to use Hugging Face model
+        try:
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            import torch
             
-                        # Load from Hugging Face Hub (using your REAL model)
-                        hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+            hf_token = get_hf_token()
             if hf_token:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
-                        # Set device
-                        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                        model = model.to(device)
-                        model.eval()
+            # Set device
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            model = model.to(device)
+            model.eval()
             
-                        # Tokenize and predict
+            # Tokenize and predict
             with torch.no_grad():
                 enc = tokenizer(
-                        tweet_text,
-                        padding="max_length",
-                        truncation=True,
-                        max_length=128,
-                        return_tensors="pt",
-                        )
+                    tweet_text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=128,
+                    return_tensors="pt",
+                )
                 
-                        input_ids = enc["input_ids"].to(device)
-                        attention_mask = enc["attention_mask"].to(device)
+                input_ids = enc["input_ids"].to(device)
+                attention_mask = enc["attention_mask"].to(device)
                 
-                        logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                        score = torch.sigmoid(logits.squeeze()).item()
+                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+                score = torch.sigmoid(logits.squeeze()).item()
                 
-                        return float(score)
+                return float(score)
                 
         except Exception as e:
             st.warning(f"Content Recycling Hugging Face model failed: {e}, using fallback")
@@ -258,54 +258,54 @@ def calculate_engagement_mismatch_score(tweet_id, engine):
         """
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0]
-                retweet_count = result[1] or 0
-                like_count = result[2] or 0
-                reply_count = result[3] or 0
+        tweet_text = result[0]
+        retweet_count = result[1] or 0
+        like_count = result[2] or 0
+        reply_count = result[3] or 0
         
-                # Try to use Hugging Face model
-                try:
-                        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-                        import torch
+        # Try to use Hugging Face model
+        try:
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            import torch
             
-                        # Load from Hugging Face Hub (using your REAL model)
-                        hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+            hf_token = get_hf_token()
             if hf_token:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
-                        # Set device
-                        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                        model = model.to(device)
-                        model.eval()
+            # Set device
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            model = model.to(device)
+            model.eval()
             
-                        # Tokenize and predict
+            # Tokenize and predict
             with torch.no_grad():
                 enc = tokenizer(
-                        tweet_text,
-                        padding="max_length",
-                        truncation=True,
-                        max_length=128,
-                        return_tensors="pt",
-                        )
+                    tweet_text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=128,
+                    return_tensors="pt",
+                )
                 
-                        input_ids = enc["input_ids"].to(device)
-                        attention_mask = enc["attention_mask"].to(device)
+                input_ids = enc["input_ids"].to(device)
+                attention_mask = enc["attention_mask"].to(device)
                 
-                        logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                        score = torch.sigmoid(logits.squeeze()).item()
+                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+                score = torch.sigmoid(logits.squeeze()).item()
                 
-                        return float(score)
+                return float(score)
                 
         except Exception as e:
             st.warning(f"Engagement Mismatch Hugging Face model failed: {e}, using fallback")
@@ -323,51 +323,51 @@ def calculate_hyperbole_falsehood_score(tweet_id, engine):
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0]
+        tweet_text = result[0]
         
-                # Try to use Hugging Face model
-                try:
-                        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-                        import torch
+        # Try to use Hugging Face model
+        try:
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            import torch
             
-                        # Load from Hugging Face Hub (using your REAL model)
-                        hf_repo = "MidlAnalytics/engagement-concordance-roberta"
-                        hf_token = get_hf_token()
+            # Load from Hugging Face Hub (using your REAL model)
+            hf_repo = "MidlAnalytics/engagement-concordance-roberta"
+            hf_token = get_hf_token()
             if hf_token:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo, token=hf_token)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo, token=hf_token)
             else:
                 tokenizer = AutoTokenizer.from_pretrained(hf_repo)
-                        model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
+                model = AutoModelForSequenceClassification.from_pretrained(hf_repo)
             
-                        # Set device
-                        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                        model = model.to(device)
-                        model.eval()
+            # Set device
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            model = model.to(device)
+            model.eval()
             
-                        # Tokenize and predict
+            # Tokenize and predict
             with torch.no_grad():
                 enc = tokenizer(
-                        tweet_text,
-                        padding="max_length",
-                        truncation=True,
-                        max_length=128,
-                        return_tensors="pt",
-                        )
+                    tweet_text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=128,
+                    return_tensors="pt",
+                )
                 
-                        input_ids = enc["input_ids"].to(device)
-                        attention_mask = enc["attention_mask"].to(device)
+                input_ids = enc["input_ids"].to(device)
+                attention_mask = enc["attention_mask"].to(device)
                 
-                        logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-                        score = torch.sigmoid(logits.squeeze()).item()
+                logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+                score = torch.sigmoid(logits.squeeze()).item()
                 
-                        return float(score)
+                return float(score)
                 
         except Exception as e:
             st.warning(f"Hyperbole/Falsehood Hugging Face model failed: {e}, using fallback")
@@ -404,8 +404,8 @@ def calculate_authority_signal_manipulation_score(tweet_id, engine):
         """
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
                         st.warning("Tweet not found or JOIN failed, using simplified logic")
@@ -512,13 +512,13 @@ def calculate_coordinated_account_network_score(tweet_id, engine):
         """
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0].lower()
+        tweet_text = result[0].lower()
                 followers_count = result[3] or 0
                 following_count = 1000  # Default value since we don't have this column
         
@@ -561,13 +561,13 @@ def calculate_emotive_manipulation_score(tweet_id, engine):
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0].lower()
+        tweet_text = result[0].lower()
         
                 # Emotional manipulation indicators
                 emotional_indicators = [
@@ -605,13 +605,13 @@ def calculate_generic_comment_score(tweet_id, engine):
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0].lower()
+        tweet_text = result[0].lower()
         
                 # Generic response indicators
                 generic_indicators = [
@@ -642,16 +642,16 @@ def calculate_rapid_engagement_spike_score(tweet_id, engine):
         """
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0].lower()
-                retweet_count = result[1] or 0
-                like_count = result[2] or 0
-                reply_count = result[3] or 0
+        tweet_text = result[0].lower()
+        retweet_count = result[1] or 0
+        like_count = result[2] or 0
+        reply_count = result[3] or 0
         
                 # Trending/viral indicators
                 trending_indicators = [
@@ -682,13 +682,13 @@ def calculate_reply_bait_score(tweet_id, engine):
         query = "SELECT text FROM [dbo].[Tweets_Sample_4M] WHERE tweet_id = :tweet_id"
         
         with engine.connect() as conn:
-                        from sqlalchemy import text
-                        result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
+            from sqlalchemy import text
+            result = conn.execute(text(query), {"tweet_id": str(tweet_id)}).fetchone()
         
         if not result:
-                        return 0.0
+            return 0.0
         
-                tweet_text = result[0].lower()
+        tweet_text = result[0].lower()
         
                 # Reply bait indicators
                 reply_bait_indicators = [
